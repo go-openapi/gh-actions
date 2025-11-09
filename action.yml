@@ -1,0 +1,40 @@
+name: 'Go OpenAPI Starter Action'
+description: 'A starter GitHub Action template for go-openapi workflows'
+author: 'go-openapi'
+
+inputs:
+  go-version:
+    description: 'Go version to use'
+    required: false
+    default: '1.21'
+  working-directory:
+    description: 'Working directory for the action'
+    required: false
+    default: '.'
+
+outputs:
+  result:
+    description: 'Result of the action execution'
+    value: ${{ steps.run-action.outputs.result }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ inputs.go-version }}
+
+    - name: Run starter action
+      id: run-action
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "::notice::Running go-openapi starter action"
+        echo "Go version: $(go version)"
+        echo "Working directory: $(pwd)"
+        echo "result=success" >> $GITHUB_OUTPUT
+
+branding:
+  icon: 'package'
+  color: 'blue'
