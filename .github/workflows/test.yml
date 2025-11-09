@@ -1,0 +1,35 @@
+name: Test Action
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test Starter Action
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run starter action
+        id: test-action
+        uses: ./
+        with:
+          go-version: '1.21'
+          working-directory: '.'
+
+      - name: Verify output
+        run: |
+          echo "Action result: ${{ steps.test-action.outputs.result }}"
+          result="${{ steps.test-action.outputs.result }}"
+          if [ "$result" != "success" ]; then
+            echo "Expected 'success' but got '$result'"
+            exit 1
+          fi
+          echo "✓ Test passed!"
