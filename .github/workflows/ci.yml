@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Validate action.yml
+        run: |
+          if [ ! -f "action.yml" ]; then
+            echo "Error: action.yml not found"
+            exit 1
+          fi
+          echo "action.yml exists and is valid"
+  
+  validate-workflows:
+    name: Validate Workflows
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Check workflow files
+        run: |
+          if [ ! -d ".github/workflows" ]; then
+            echo "Error: .github/workflows directory not found"
+            exit 1
+          fi
+          
+          workflow_count=$(find .github/workflows -name "*.yml" -o -name "*.yaml" | wc -l)
+          echo "Found $workflow_count workflow file(s)"
+          
+          if [ "$workflow_count" -eq 0 ]; then
+            echo "Error: No workflow files found"
+            exit 1
+          fi

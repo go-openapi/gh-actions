@@ -1,0 +1,74 @@
+name: Test Action
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  test-action:
+    name: Test Go Coverage Action
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Create sample Go project
+        run: |
+          mkdir -p test-project
+          cd test-project
+          
+          # Initialize Go module
+          cat > go.mod << 'EOF'
+          module github.com/go-openapi/gh-actions/test-project
+          
+          go 1.21
+          EOF
+          
+          # Create a sample Go file
+          cat > main.go << 'EOF'
+          package main
+          
+          import "fmt"
+          
+          func main() {
+              fmt.Println(Greet("World"))
+          }
+          
+          func Greet(name string) string {
+              return fmt.Sprintf("Hello, %s!", name)
+          }
+          EOF
+          
+          # Create a test file
+          cat > main_test.go << 'EOF'
+          package main
+          
+          import "testing"
+          
+          func TestGreet(t *testing.T) {
+              result := Greet("Gopher")
+              expected := "Hello, Gopher!"
+              if result != expected {
+                  t.Errorf("Greet() = %v, want %v", result, expected)
+              }
+          }
+          EOF
+      
+      - name: Run action
+        uses: ./
+        with:
+          go-version: '1.21'
+          working-directory: 'test-project'
+          coverage-file: 'coverage.out'
+          test-flags: '-v -race'
+      
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: test-project/coverage.out
+          retention-days: 5
