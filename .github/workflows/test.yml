@@ -11,6 +11,8 @@ jobs:
   test-action:
     name: Test Go Coverage Action
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout code
