@@ -48,7 +48,7 @@ jobs:
         run: |
           mkdir -p tools
 
-          VERSION=$(cat "${VERSION_FILE}"|yq ".${TOOL}")
+          VERSION=$(yq ".${TOOL}" < "${VERSION_FILE}")
           if [[ -z "${VERSION}" ]] ; then
             echo "::error::Could not resolve version for tool ${TOOL}"
             exit 1
@@ -59,7 +59,7 @@ jobs:
       -
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
-          repository: ${{ matrix.dependency_repo }}
+          repository: ${{ matrix.github_repo }}
           ref: ${{ steps.resolve-version.outputs.version }}
           path: tools/${{ matrix.tool }}
       -
