@@ -27,7 +27,7 @@ jobs:
         include:
           - tool: gotestsum
             github_repo: gotestyourself/gotestsum
-          - tool: go-junit-repo
+          - tool: go-junit-report
             github_repo: jstemmer/go-junit-report
           - tool: go-ctrf-json-reporter
             github_repo: ctrf-io/go-ctrf-json-reporter
