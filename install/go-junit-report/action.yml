@@ -65,6 +65,7 @@ runs:
         TARGET_DIR: ${{ github.action_path }}/bin
         TOOL: gotestsum
         VERSION: ${{ steps.resolve-version.outputs.version }}
+        GH_TOKEN: ${{ github.token }}
       run: |
         OS=$(echo '${{ runner.os }}'|tr '[A-Z]' '[a-z]'|sed 's/macos/darwin/')
         ARCH=$(echo '${{ runner.arch }}'|tr '[A-Z]' '[a-z]')
