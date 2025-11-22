@@ -65,7 +65,7 @@ jobs:
       -
         name: Vulnerability scan by trivy
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # v0.33.1
-        working-dir: tools/${{ matrix.tool }}
+        working-directory: tools/${{ matrix.tool }}
         with:
           scan-type: repo
           format: table
@@ -73,7 +73,7 @@ jobs:
       -
         name: Vulnerability scan by govulncheck
         id: govulncheck
-        working-dir: tools/${{ matrix.tool }}
+        working-directory: tools/${{ matrix.tool }}
         uses: golang/govulncheck-action@b625fbe08f3bccbe446d94fbf87fcc875a4f50ee # v1.0.4
         with:
           output-format: text
