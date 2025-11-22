@@ -31,20 +31,17 @@ runs:
   steps:
     - 
       name: Install gotestsum
-      working-directory: ${{ github.action_path }}
-      uses: ${{ github.action_path }}/install/gotestsum
+      uses: ./install/gotestsum
       with:
         version: ${{ inputs.version-gotestsum }}
     - 
       name: Install go-junit-report
-      working-directory: ${{ github.action_path }}
-      uses: ${{ github.action_path }}/install/go-junit-report
+      uses: ./install/go-junit-report
       with:
         version: ${{ inputs.version-go-junit-report }}
     - 
       name: Install go-ctrf-json-reporter
-      working-directory: ${{ github.action_path }}
-      uses: ${{ github.action_path }}/install/go-ctrf-json-reporter
+      uses: ./install/go-ctrf-json-reporter
       with:
         version: ${{ inputs.version-go-ctrf-json-reporter }}
 
