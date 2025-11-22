@@ -61,6 +61,7 @@ runs:
         TOOL: go-ctrf-json-reporter
         VERSION: ${{ steps.resolve-version.outputs.version }}
       run: |
+        set -x
         go install github.com/ctrf-io/go-ctrf-json-reporter/cmd/go-ctrf-json-reporter@"${VERSION}"
 
 branding:

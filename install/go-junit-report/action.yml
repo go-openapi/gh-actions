@@ -68,13 +68,15 @@ runs:
         GH_TOKEN: ${{ github.token }}
       run: |
         OS=$(echo '${{ runner.os }}'|tr '[A-Z]' '[a-z]'|sed 's/macos/darwin/')
-        ARCH=$(echo '${{ runner.arch }}'|tr '[A-Z]' '[a-z]')
+        ARCH=$(echo '${{ runner.arch }}'|tr '[A-Z]' '[a-z]'|sed 's/x64/amd64/')
 
         mkdir -p "${DOWNLOAD_DIR}"
 
+        set -x
+        # e.g. go-junit-report-v2.1.0-darwin-arm64.tar.gz
         gh release download "${VERSION}" \
           --repo "${REPO}" \
-          --pattern "*_${OS}_${ARCH}.tar.gz" \
+          --pattern "*-${OS}-${ARCH}.tar.gz" \
           --output "${DOWNLOAD_DIR}"/artifact.tgz
 
         # should check checksum etc
