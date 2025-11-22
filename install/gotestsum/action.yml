@@ -75,8 +75,7 @@ runs:
         gh release download "${VERSION}" \
           --repo "${REPO}" \
           --pattern "*_${OS}_${ARCH}.tar.gz" \
-          --dir "${DOWNLOAD_DIR}" \
-          --output artifact.tgz
+          --output "${DOWNLOAD_DIR}"/artifact.tgz
 
         # should check checksum etc
         (cd "${DOWNLOAD_DIR}" && tar xf artifact.tgz "${TOOL}" && rm -f artifact.tgz)
