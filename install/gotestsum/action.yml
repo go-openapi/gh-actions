@@ -40,7 +40,7 @@ runs:
       id: resolve-version
       shell: bash
       env:
-        VERSION_FILE: ${{ github.action_path }}/versions.yml
+        VERSION_FILE: ${{ github.action_path }}/../../versions.yml
         TOOL: gotestsum
       run: |
         if [[ '${{ !inputs.version }}' == 'true' || '${{ inputs.version }}' == 'auto' ]] ; then
