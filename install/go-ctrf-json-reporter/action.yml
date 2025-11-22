@@ -62,7 +62,7 @@ runs:
         VERSION: ${{ steps.resolve-version.outputs.version }}
       run: |
         set -x
-        go install github.com/ctrf-io/go-ctrf-json-reporter/cmd/go-ctrf-json-reporter@"${VERSION}"
+        go install "${REPO}"/cmd/"${TOOL}"@"${VERSION}"
         TARGET_DIR=${GOPATH:-${HOME}/go}/bin
         echo "${TARGET_DIR}/bin" >> "$GITHUB_PATH"
 

@@ -28,4 +28,4 @@ jobs:
           set -x
           gotestsum --help
           go-junit-report --help
-          go-ctrf-json-report --help
+          go-ctrf-json-reporter --help
