@@ -1,0 +1,79 @@
+name: Vulnerability scans
+
+permissions: read-all
+
+# description: |
+# Scans the go dependencies repos for vulnerabilities
+# whenever we change the downloaded version.
+#
+# This prevents from upgrading to a version which is exposed to known vulnerabilities.
+
+on:
+  push:
+    branches:
+    - master
+    paths:
+      - versions.yml
+  pull_requests:
+    paths:
+      - versions.yml
+
+jobs:
+  analysis:
+    name: Vulnerability scan on downloaded tools
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - tool: gotestsum
+            github_repo: gotestyourself/gotestsum
+          - tool: go-junit-repo
+            github_repo: jstemmer/go-junit-report
+          - tool: go-ctrf-json-reporter
+            github_repo: ctrf-io/go-ctrf-json-reporter
+    permissions:
+      contents: read
+    steps:
+      -
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          sparse-checkout: 'versions.yml'
+      -
+        name: Resolve version
+        id: resolve-version
+        shell: bash
+        env:
+          VERSION_FILE: versions.yml
+          TOOL: ${{ matrix.tool }}
+        run: |
+          mkdir -p tools
+
+          VERSION=$(cat "${VERSION_FILE}"|yq ".${TOOL}")
+          if [[ -z "${VERSION}" ]] ; then
+            echo "::error::Could not resolve version for tool ${TOOL}"
+            exit 1
+          fi
+
+          echo "::notice title=Version:${VERSION}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+      -
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          repository: ${{ matrix.dependency_repo }}
+          ref: ${{ outputs.steps.resolve-version.version }}
+          path: tools/${{ matrix.tool }}
+      -
+        name: Vulnerability scan by trivy
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # v0.33.1
+        working-dir: tools/${{ matrix.tool }}
+        with:
+          scan-type: repo
+          format: table
+          scanners: vuln,secret
+      -
+        name: Vulnerability scan by govulncheck
+        id: govulncheck
+        working-dir: tools/${{ matrix.tool }}
+        uses: golang/govulncheck-action@b625fbe08f3bccbe446d94fbf87fcc875a4f50ee # v1.0.4
+        with:
+          output-format: text
