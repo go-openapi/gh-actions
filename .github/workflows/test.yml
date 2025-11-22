@@ -25,8 +25,7 @@ jobs:
           cache: true
           pyflakes: false
           fail-on-error: false
-          files: ".github/**/*.yml,action.yml,install/**/*.yml"
-          #flags: "-ignore SC2086"  # optional
+          files: ".github/**/*.yml" # actionlint cannot evaluate action.yml, only workflows
       -
         name: actionlint error summary
         if: ${{ steps.actionlint.outputs.exit-code != 0 }}
@@ -39,7 +38,8 @@ jobs:
           echo "actionlint found ${{ steps.actionlint.outputs.total-errors }} errors"
           echo "actionlint checked ${{ steps.actionlint.outputs.total-files }} files"
           echo "actionlint cache used: ${{ steps.actionlint.outputs.cache-hit }}"
-          exit ${{ steps.actionlint.outputs.exit-code }}
+
+          exit 1
 
   test-action:
     name: Test install actions
