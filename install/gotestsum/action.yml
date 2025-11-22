@@ -10,7 +10,7 @@ inputs:
   version:
     description: |
       State explicitly the version to be downloaded.
-      
+
       By default the "auto" value uses the versions configured in "version.yaml"
     required: false
     default: auto
@@ -36,15 +36,20 @@ runs:
           echo "::error::please build locally with go or see available artifacts at https://github.com/gotestyourself/gotestsum/releases"
           exit 1
     -
+      uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
+      with:
+        go-version: stable
+        check-latest: true
+        cache: true
+    -
       name: Resolve version
       id: resolve-version
       shell: bash
       env:
-        VERSION_FILE: ${{ github.action_path }}/../../versions.yml
         TOOL: gotestsum
       run: |
         if [[ '${{ !inputs.version }}' == 'true' || '${{ inputs.version }}' == 'auto' ]] ; then
-          VERSION=$(cat "${VERSION_FILE}"|yq ".${TOOL}")
+          VERSION=$(../../get-tool-version.sh "${TOOL}")
         else
           VERSION='${{ inputs.version }}'
         fi
@@ -56,7 +61,7 @@ runs:
 
         echo "::notice title=Version:${VERSION}"
         echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-    - 
+    -
       name: Install gotestsum
       shell: bash
       env:

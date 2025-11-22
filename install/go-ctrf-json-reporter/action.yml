@@ -27,15 +27,20 @@ runs:
   using: composite
   steps:
     -
+      uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
+      with:
+        go-version: stable
+        check-latest: true
+        cache: true
+    -
       name: Resolve version
       id: resolve-version
       shell: bash
       env:
-        VERSION_FILE: ${{ github.action_path }}/../../versions.yml
         TOOL: go-ctrf-json-reporter
       run: |
         if [[ '${{ !inputs.version }}' == 'true' || '${{ inputs.version }}' == 'auto' ]] ; then
-          VERSION=$(cat "${VERSION_FILE}"|yq ".${TOOL}")
+          VERSION=$(../../get-tool-version.sh "${TOOL}")
         else
           VERSION='${{ inputs.version }}'
         fi
@@ -48,12 +53,6 @@ runs:
         echo "::notice title=Version:${VERSION}"
         echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
     -
-      uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
-      with:
-        go-version: stable
-        check-latest: true
-        cache: true
-    - 
       name: Install go-ctrf-json-reporter
       shell: bash
       env:

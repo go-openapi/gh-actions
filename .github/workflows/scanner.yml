@@ -14,9 +14,11 @@ on:
     - master
     paths:
       - versions.yml
+      - go.mod
   pull_request:
     paths:
       - versions.yml
+      - go.mod
 
 jobs:
   analysis:
@@ -36,8 +38,12 @@ jobs:
     steps:
       -
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      -
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
-          sparse-checkout: 'versions.yml'
+          go-version: stable
+          check-latest: true
+          cache: true
       -
         name: Resolve version
         id: resolve-version
@@ -48,7 +54,7 @@ jobs:
         run: |
           mkdir -p tools
 
-          VERSION=$(yq ".${TOOL}" < "${VERSION_FILE}")
+          VERSION=$(./get-tool-version.sh ${TOOL})
           if [[ -z "${VERSION}" ]] ; then
             echo "::error::Could not resolve version for tool ${TOOL}"
             exit 1

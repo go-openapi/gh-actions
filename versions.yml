@@ -1,5 +1,0 @@
-# current versions of the tools being installed by this action
-gotestsum: v1.13.0
-go-junit-report: v2.1.0
-go-ctrf-json-reporter: v0.0.10
-#go-ctrf-json-reporter: v0.0.12
