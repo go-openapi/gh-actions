@@ -1,0 +1,53 @@
+name: Dependabot auto-merge
+on: pull_request
+
+permissions:
+  contents: read
+
+jobs:
+  dependabot:
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
+    steps:
+      -
+        name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@08eff52bf64351f401fb50d4972fa95b9f2c2d1b # v2.4.0
+      -
+        name: Auto-approve all dependabot PRs
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: gh pr review --approve "$PR_URL"
+      -
+        name: Auto-merge dependabot PRs for development dependencies
+        if: ${{ contains(steps.metadata.outputs.dependency-group, 'development-dependencies') }}
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: gh pr merge --auto --rebase "$PR_URL"
+
+  # Auto merge for github-action bot is current disabled: we need automatic PRs to swap identity (e.g. using a Github App),
+  # so the pull_request event is properly captured and the PR can validate.
+  #actions-bot:
+  #  permissions:
+  #    contents: write
+  #    pull-requests: write
+  #  runs-on: ubuntu-latest
+  #  if: ${{ github.event.pull_request.user.login == 'github-actions[bot]' }}
+  #  steps:
+  #    -
+  #      name: Auto-approve all github-actions bot PRs
+  #      env:
+  #        PR_URL: ${{github.event.pull_request.html_url}}
+  #        GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  #      run: gh pr review --approve "$PR_URL"
+  #    -
+  #      name: Auto-merge github-actions bot PRs
+  #      env:
+  #        PR_URL: ${{github.event.pull_request.html_url}}
+  #        GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  #      run: gh pr merge --auto --rebase "$PR_URL"

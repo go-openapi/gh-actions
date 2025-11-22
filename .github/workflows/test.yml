@@ -1,0 +1,63 @@
+name: Test Action
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint-action:
+    name: Lint actions
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      -
+        name: Checkout repository
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      -
+        name: actionlint
+        id: actionlint
+        uses: raven-actions/actionlint@3a24062651993d40fed1019b58ac6fbdfbf276cc # v2.0.1
+        with:
+          cache: true
+          pyflakes: false
+          fail-on-error: false
+          files: ".github/**/*.yml" # actionlint cannot evaluate action.yml, only workflows
+      -
+        name: actionlint error summary
+        if: ${{ steps.actionlint.outputs.exit-code != 0 }}
+        run: |
+          echo "Used actionlint version ${{ steps.actionlint.outputs.version-semver }}"
+          echo "Used actionlint release ${{ steps.actionlint.outputs.version-tag }}"
+          echo "::error::actionlint ended with ${{ steps.actionlint.outputs.exit-code }} exit code"
+
+          echo "actionlint ended because '${{ steps.actionlint.outputs.exit-message }}'"
+          echo "actionlint found ${{ steps.actionlint.outputs.total-errors }} errors"
+          echo "actionlint checked ${{ steps.actionlint.outputs.total-files }} files"
+          echo "actionlint cache used: ${{ steps.actionlint.outputs.cache-hit }}"
+
+          exit 1
+
+  test-action:
+    name: Test install actions
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - 
+        name: Checkout repository
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - 
+        name: Run install-all action
+        id: test-action
+        uses: ./
+
+      - name: Verify that tools are installed
+        run: |
+          set -x
+          gotestsum --help
+          go-junit-report --help
+          go-ctrf-json-reporter --help

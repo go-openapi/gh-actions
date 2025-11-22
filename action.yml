@@ -1,0 +1,50 @@
+name: go-openapi composite action
+description: |
+  Composite github action for go-openapi workflows.
+
+  It installs the following test tools from binary releases:
+
+  * gotestsum
+  * go-junit-report
+  * go-ctrf-json-reporter
+
+  When used directly, this action installs all the tools.
+
+  You probably don't want to use this umbrella action and use
+  unitary actions instead. Please refer to [the documentation](./README.md).
+
+author: go-openapi
+
+inputs:
+  version-gotestsum:
+    default: auto
+    required: false
+  version-go-junit-report:
+    default: auto
+    required: false
+  version-go-ctrf-json-reporter:
+    default: auto
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - 
+      name: Install gotestsum
+      uses: ./install/gotestsum
+      with:
+        version: ${{ inputs.version-gotestsum }}
+    - 
+      name: Install go-junit-report
+      uses: ./install/go-junit-report
+      with:
+        version: ${{ inputs.version-go-junit-report }}
+    - 
+      name: Install go-ctrf-json-reporter
+      uses: ./install/go-ctrf-json-reporter
+      with:
+        version: ${{ inputs.version-go-ctrf-json-reporter }}
+
+branding:
+  icon: 'package'
+  color: 'blue'

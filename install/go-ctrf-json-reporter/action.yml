@@ -1,0 +1,71 @@
+name: go-ctrf-json-reporter installer
+description: |
+  Download the latest vetted version of go-ctrf-json-reporter.
+
+  github.com/ctrf-io/go-ctrf-json-reporter@{version}
+
+  NOTE: go-ctrf-json-report doesn't currently issue binary releases:
+  so this is a go build with go install.
+
+author: go-openapi
+
+inputs:
+  version:
+    description: |
+      State explicitly the version to be downloaded.
+      
+      By default the "auto" value uses the versions configured in "version.yaml"
+    required: false
+    default: auto
+
+outputs:
+  version:
+    description: The version of the tool that has been installed
+    value: ${{ steps.resolve-version.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    -
+      uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
+      with:
+        go-version: stable
+        check-latest: true
+        cache: true
+    -
+      name: Resolve version
+      id: resolve-version
+      shell: bash
+      env:
+        TOOL: go-ctrf-json-reporter
+        VERSION_RESOLVER: '${{ github.action_path }}/../../get-tool-version.sh'
+      run: |
+        if [[ '${{ !inputs.version }}' == 'true' || '${{ inputs.version }}' == 'auto' ]] ; then
+          VERSION=$("${VERSION_RESOLVER}" "${TOOL}")
+        else
+          VERSION='${{ inputs.version }}'
+        fi
+
+        if [[ -z "${VERSION}" ]] ; then
+          echo "::error::Could not resolve version for tool ${TOOL}"
+          exit 1
+        fi
+
+        echo "::notice title=Version:${VERSION}"
+        echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+    -
+      name: Install go-ctrf-json-reporter
+      shell: bash
+      env:
+        REPO: github.com/ctrf-io/go-ctrf-json-reporter
+        TOOL: go-ctrf-json-reporter
+        VERSION: ${{ steps.resolve-version.outputs.version }}
+      run: |
+        set -x
+        go install "${REPO}"/cmd/"${TOOL}"@"${VERSION}"
+        TARGET_DIR=${GOPATH:-${HOME}/go}/bin
+        echo "${TARGET_DIR}/bin" >> "$GITHUB_PATH"
+
+branding:
+  icon: 'package'
+  color: 'blue'
