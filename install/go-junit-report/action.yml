@@ -63,7 +63,7 @@ runs:
         REPO: jstemmer/go-junit-report
         DOWNLOAD_DIR: ${{ runner.temp }}/downloads
         TARGET_DIR: ${{ github.action_path }}/bin
-        TOOL: gotestsum
+        TOOL: go-junit-report
         VERSION: ${{ steps.resolve-version.outputs.version }}
         GH_TOKEN: ${{ github.token }}
       run: |
