@@ -16,4 +16,5 @@ import (
 )
 
 func main() {
+	// no need to run or test anything: we are only interested in keeping go.mod up to date
 }

@@ -13,11 +13,9 @@ on:
     branches:
     - master
     paths:
-      - versions.yml
       - go.mod
   pull_request:
     paths:
-      - versions.yml
       - go.mod
 
 jobs:
@@ -84,3 +82,16 @@ jobs:
           repo-checkout: false
           output-format: text
           work-dir: tools/${{ matrix.tool }}
+
+  vulnerabily-check:
+    name: Vulnerability scans passed
+    runs-on: ubuntu-latest
+    needs: [analysis]
+    permissions:
+      contents: read
+    steps:
+      -
+        name: All scans passed
+        run: |
+          echo "Alll vulnerability scans passed"
+          echo "::notice title=Scans passed"
