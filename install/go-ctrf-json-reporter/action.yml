@@ -63,6 +63,8 @@ runs:
       run: |
         set -x
         go install github.com/ctrf-io/go-ctrf-json-reporter/cmd/go-ctrf-json-reporter@"${VERSION}"
+        TARGET_DIR=${GOPATH:-${HOME}/go}/bin
+        echo "${TARGET_DIR}/bin" >> "$GITHUB_PATH"
 
 branding:
   icon: 'package'

@@ -25,6 +25,7 @@ jobs:
       - name: Verify that tools are installed
         # TODO: check version
         run: |
+          set -x
           gotestsum --help
           go-junit-report --help
           go-ctrf-json-report --help
