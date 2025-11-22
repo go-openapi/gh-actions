@@ -54,7 +54,7 @@ jobs:
         run: |
           mkdir -p tools
 
-          VERSION=$(./get-tool-version.sh ${TOOL})
+          VERSION=$(./get-tool-version.sh "${TOOL}")
           if [[ -z "${VERSION}" ]] ; then
             echo "::error::Could not resolve version for tool ${TOOL}"
             exit 1

@@ -4,13 +4,13 @@
 tool=${1?-Tool name is a required argument}
 
 case "${tool}" in
-  gotestsum)
+  go-ctrf-json-reporter)
     GO_IMPORT_PATH="github.com/ctrf-io/go-ctrf-json-reporter"
     ;;
   go-junit-report)
     GO_IMPORT_PATH="github.com/jstemmer/go-junit-report/v2"
     ;;
-  go-ctrf-json-reporter)
+  gotestsum)
     GO_IMPORT_PATH="gotest.tools/gotestsum"
     ;;
   *)
