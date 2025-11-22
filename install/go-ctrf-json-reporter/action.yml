@@ -12,7 +12,7 @@ author: go-openapi
 inputs:
   version:
     description: |
-      State expicitly the version to be downloaded.
+      State explicitly the version to be downloaded.
       
       By default the "auto" value uses the versions configured in "version.yaml"
     required: false

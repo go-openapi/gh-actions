@@ -9,7 +9,7 @@ author: go-openapi
 inputs:
   version:
     description: |
-      State expicitly the version to be downloaded.
+      State explicitly the version to be downloaded.
       
       By default the "auto" value uses the versions configured in "version.yaml"
     required: false
@@ -25,7 +25,7 @@ runs:
   steps:
     -
       name: Check if runner is supported
-      if: >
+      if: >-
         ${{
           (runner.os != "Linux" && runner.os != "macOS" && runner.os != "Windows") ||
           (runner.arch != "X64" && runner.arch != "ARM64")
