@@ -38,8 +38,8 @@ To use this action in your workflow, reference it using the standard GitHub Acti
 
 ## Motivation
 
-This repository currently exposes "installer" actions for some testing go tools
-so CI workflows may use and pin released actions instead of resorting to a "go install ...@latest"
+This repository currently exposes "installer" actions for some testing go tools and
+CI workflows may use and pin released actions instead of resorting to a `go install ...@latest`
 command.
 
 This is mostly motivated by the need to pin CI dependencies to a specific commit and use only
@@ -67,7 +67,7 @@ This library ships under the [SPDX-License-Identifier: Apache-2.0](./LICENSE).
 * [Contributing guidelines](.github/CONTRIBUTING.md)
 
 <!-- Badges: status  -->
-[test-badge]: https://github.com/go-openapi/gh-actions/actions/workflows/go-test.yml/badge.svg
+[test-badge]: https://github.com/go-openapi/gh-actions/actions/workflows/test.yml/badge.svg
 [test-url]: https://github.com/go-openapi/gh-actions/actions/workflows/test.yml
 <!--
 [cov-badge]: https://codecov.io/gh/go-openapi/gh-actions/branch/master/graph/badge.svg
