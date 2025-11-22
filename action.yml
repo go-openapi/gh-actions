@@ -1,39 +1,52 @@
-name: 'Go OpenAPI Starter Action'
-description: 'A starter GitHub Action template for go-openapi workflows'
-author: 'go-openapi'
+name: go-openapi composite action
+description: |
+  Composite github action for go-openapi workflows.
+
+  It installs the following test tools from binary releases:
+
+  * gotestsum
+  * go-junit-report
+  * go-ctrf-json-reporter
+
+  When used directly, this action installs all the tools.
+
+  You probably don't want to use this umbrella action and use
+  unitary actions instead. Please refer to [the documentation](./README.md).
+
+author: go-openapi
 
 inputs:
-  go-version:
-    description: 'Go version to use'
+  version-gotestsum:
+    default: auto
     required: false
-    default: '1.21'
-  working-directory:
-    description: 'Working directory for the action'
+  version-go-junit-report:
+    default: auto
     required: false
-    default: '.'
-
-outputs:
-  result:
-    description: 'Result of the action execution'
-    value: ${{ steps.run-action.outputs.result }}
+  version-go-ctrf-json-reporter:
+    default: auto
+    required: false
 
 runs:
-  using: 'composite'
+  using: composite
   steps:
-    - name: Setup Go
-      uses: actions/setup-go@v5
+    - 
+      name: Install gotestsum
+      working-directory: ${{ github.action_path }}
+      uses: ${{ github.action_path }}/install/gotestsum
       with:
-        go-version: ${{ inputs.go-version }}
-
-    - name: Run starter action
-      id: run-action
-      shell: bash
-      working-directory: ${{ inputs.working-directory }}
-      run: |
-        echo "::notice::Running go-openapi starter action"
-        echo "Go version: $(go version)"
-        echo "Working directory: $(pwd)"
-        echo "result=success" >> $GITHUB_OUTPUT
+        version: ${{ inputs.version-gotestsum }}
+    - 
+      name: Install go-junit-report
+      working-directory: ${{ github.action_path }}
+      uses: ${{ github.action_path }}/install/go-junit-report
+      with:
+        version: ${{ inputs.version-go-junit-report }}
+    - 
+      name: Install go-ctrf-json-reporter
+      working-directory: ${{ github.action_path }}
+      uses: ${{ github.action_path }}/install/go-ctrf-json-reporter
+      with:
+        version: ${{ inputs.version-go-ctrf-json-reporter }}
 
 branding:
   icon: 'package'
