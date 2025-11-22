@@ -8,8 +8,41 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
-    name: Test install action
+  lint-action:
+    name: Lint actions
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      -
+        name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      -
+        name: actionlint
+        id: actionlint
+        uses: raven-actions/actionlint@3a24062651993d40fed1019b58ac6fbdfbf276cc # v2.0.1
+        with:
+          cache: true
+          pyflakes: false
+          fail-on-error: false
+          files: ".github/**/*.yml,action.yml,install/**/*.yml"
+          #flags: "-ignore SC2086"  # optional
+      -
+        name: actionlint error summary
+        if: ${{ steps.actionlint.outputs.exit-code != 0 }}
+        run: |
+          echo "Used actionlint version ${{ steps.actionlint.outputs.version-semver }}"
+          echo "Used actionlint release ${{ steps.actionlint.outputs.version-tag }}"
+          echo "::error::actionlint ended with ${{ steps.actionlint.outputs.exit-code }} exit code"
+
+          echo "actionlint ended because '${{ steps.actionlint.outputs.exit-message }}'"
+          echo "actionlint found ${{ steps.actionlint.outputs.total-errors }} errors"
+          echo "actionlint checked ${{ steps.actionlint.outputs.total-files }} files"
+          echo "actionlint cache used: ${{ steps.actionlint.outputs.cache-hit }}"
+          exit ${{ steps.actionlint.outputs.exit-code }}
+
+  test-action:
+    name: Test install actions
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -23,7 +56,6 @@ jobs:
         uses: ./
 
       - name: Verify that tools are installed
-        # TODO: check version
         run: |
           set -x
           gotestsum --help
