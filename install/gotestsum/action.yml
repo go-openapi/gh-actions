@@ -7,9 +7,13 @@ description: |
 author: go-openapi
 
 inputs:
-  version: string
-  required: false
-  default: auto
+  version:
+    description: |
+      State expicitly the version to be downloaded.
+      
+      By default the "auto" value uses the versions configured in "version.yaml"
+    required: false
+    default: auto
 
 outputs:
   version:
@@ -26,6 +30,7 @@ runs:
           (runner.os != "Linux" && runner.os != "macOS" && runner.os != "Windows") ||
           (runner.arch != "X64" && runner.arch != "ARM64")
         }}
+      shell: bash
       run: |
           echo "::error::installation not supported for ${{ runner.os }} on ${{ runner.arch }}"
           echo "::error::please build locally with go or see available artifacts at https://github.com/gotestyourself/gotestsum/releases"
