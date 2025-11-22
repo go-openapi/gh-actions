@@ -1,7 +1,7 @@
 # gh-actions
 
 <!-- Badges: status  -->
-[![Tests][test-badge]][test-url] [![Coverage][cov-badge]][cov-url] [![CI vuln scan][vuln-scan-badge]][vuln-scan-url] [![CodeQL][codeql-badge]][codeql-url]
+[![Tests][test-badge]][test-url] <!--[![Coverage][cov-badge]][cov-url]--> [![CI vuln scan][vuln-scan-badge]][vuln-scan-url] [![CodeQL][codeql-badge]][codeql-url]
 <!-- Badges: release & docker images  -->
 <!-- Badges: code quality  -->
 <!-- Badges: license & compliance -->
@@ -17,7 +17,7 @@ GitHub Actions used by go-openapi workflows.
 
 ## Status
 
-This project is in an early stage. It is being actively developed and is not released yet.
+This project is still in a very early stage. It is being actively developed and has not released yet.
 
 ## Usage
 
@@ -36,6 +36,22 @@ To use this action in your workflow, reference it using the standard GitHub Acti
 - uses: go-openapi/gh-actions/install/go-ctrf-json-reporter@v1
 ```
 
+## Motivation
+
+This repository currently exposes "installer" actions for some testing go tools
+so CI workflows may use and pin released actions instead of resorting to a "go install ...@latest"
+command.
+
+This is mostly motivated by the need to pin CI dependencies to a specific commit and use only
+vetted versions of the installed tooling.
+
+Our actions try to install tools from binary releases whenever applicable.
+
+Automated version tracking is obtained thanks to a dummy `go.mod` module declaration in this repo,
+which allows dependabot to track our target tools and post updates.
+
+A vulnerability scan on the source repo of the tools must be passed for such an update to be approved and merged.
+
 ## Change log
 
 See <https://github.com/go-openapi/gh-actions/releases>
@@ -52,9 +68,11 @@ This library ships under the [SPDX-License-Identifier: Apache-2.0](./LICENSE).
 
 <!-- Badges: status  -->
 [test-badge]: https://github.com/go-openapi/gh-actions/actions/workflows/go-test.yml/badge.svg
-[test-url]: https://github.com/go-openapi/gh-actions/actions/workflows/go-test.yml
+[test-url]: https://github.com/go-openapi/gh-actions/actions/workflows/test.yml
+<!--
 [cov-badge]: https://codecov.io/gh/go-openapi/gh-actions/branch/master/graph/badge.svg
 [cov-url]: https://codecov.io/gh/go-openapi/gh-actions
+-->
 [vuln-scan-badge]: https://github.com/go-openapi/gh-actions/actions/workflows/scanner.yml/badge.svg
 [vuln-scan-url]: https://github.com/go-openapi/gh-actions/actions/workflows/scanner.yml
 [codeql-badge]: https://github.com/go-openapi/gh-actions/actions/workflows/codeql.yml/badge.svg
