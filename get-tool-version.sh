@@ -1,5 +1,6 @@
 #! /bin/bash
 # Resolve the tool release version from go.mod
+# without requiring go to be installed.
 
 tool=${1?-Tool name is a required argument}
 
@@ -19,4 +20,5 @@ case "${tool}" in
     ;;
 esac
 
-go mod edit -json|jq -r ".Require|.[]|select(.Path==\"${GO_IMPORT_PATH}\")|.Version"
+root=$(git rev-parse --show-toplevel)
+grep "${GO_IMPORT_PATH}" "${root}"/go.mod|xargs|cut -d' ' -f2

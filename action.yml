@@ -8,10 +8,7 @@ description: |
   * go-junit-report
   * go-ctrf-json-reporter
 
-  When used directly, this action installs all the tools.
-
-  You probably don't want to use this umbrella action and use
-  unitary actions instead. Please refer to [the documentation](./README.md).
+  Please refer to [the documentation](./README.md).
 
 author: go-openapi
 
