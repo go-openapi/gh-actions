@@ -1,6 +1,9 @@
 #! /bin/bash
 # Resolve the tool release version from go.mod
 # without requiring go to be installed.
+#
+# Notice that when executed on github runner, this folder
+# is not a git directory. So usual git commands are not available.
 
 tool=${1?-Tool name is a required argument}
 
@@ -20,5 +23,5 @@ case "${tool}" in
     ;;
 esac
 
-root=$(git rev-parse --show-toplevel)
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 grep "${GO_IMPORT_PATH}" "${root}"/go.mod|xargs|cut -d' ' -f2

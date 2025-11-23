@@ -72,15 +72,18 @@ runs:
 
         mkdir -p "${DOWNLOAD_DIR}"
 
-        set -x
+        ARCHIVE_FORMAT=".tar.gz"
         # e.g. gotestsum_1.13.0_linux_amd64.tar.gz
         gh release download "${VERSION}" \
           --repo "${REPO}" \
-          --pattern "*_${OS}_${ARCH}.tar.gz" \
-          --output "${DOWNLOAD_DIR}"/artifact.tgz
+          --pattern "*_${OS}_${ARCH}${ARCHIVE_FORMAT}" \
+          --output "${DOWNLOAD_DIR}"/"artifact${ARCHIVE_FORMAT}"
 
         # should check checksum etc
-        (cd "${DOWNLOAD_DIR}" && tar xf artifact.tgz "${TOOL}" && rm -f artifact.tgz)
+        if [[ "${OS}" == 'windows' ]] ; then
+          TOOL="${TOOL}.exe"
+        fi
+        (cd "${DOWNLOAD_DIR}" && tar xf "artifact${ARCHIVE_FORMAT}" "${TOOL}" && rm -f "artifact${ARCHIVE_FORMAT}")
 
         mkdir -p "${TARGET_DIR}"
         mv "${DOWNLOAD_DIR}"/"${TOOL}" "${TARGET_DIR}"

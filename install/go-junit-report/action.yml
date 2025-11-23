@@ -74,13 +74,23 @@ runs:
 
         set -x
         # e.g. go-junit-report-v2.1.0-darwin-arm64.tar.gz
+        ARCHIVE_FORMAT=".tar.gz"
+        if [[ '${{ runner.os }}' == 'Windows' ]] ; then
+          ARCHIVE_FORMAT=".zip"
+        fi
+
         gh release download "${VERSION}" \
           --repo "${REPO}" \
-          --pattern "*-${OS}-${ARCH}.tar.gz" \
-          --output "${DOWNLOAD_DIR}"/artifact.tgz
+          --pattern "*-${OS}-${ARCH}${ARCHIVE_FORMAT}" \
+          --output "${DOWNLOAD_DIR}"/"artifact${ARCHIVE_FORMAT}"
 
         # should check checksum etc
-        (cd "${DOWNLOAD_DIR}" && tar xf artifact.tgz "${TOOL}" && rm -f artifact.tgz)
+        if [[ "${OS}" != 'windows' ]] ; then
+          (cd "${DOWNLOAD_DIR}" && tar xf "artifact${ARCHIVE_FORMAT}" "${TOOL}" && rm -f "artifact${ARCHIVE_FORMAT}")
+        else
+          TOOL="${TOOL}.exe"
+          (cd "${DOWNLOAD_DIR}" && unzip "artifact${ARCHIVE_FORMAT}" "${TOOL}" && rm -f "artifact${ARCHIVE_FORMAT}")
+        fi
 
         mkdir -p "${TARGET_DIR}"
         mv "${DOWNLOAD_DIR}"/"${TOOL}" "${TARGET_DIR}"
