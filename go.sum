@@ -1,7 +1,7 @@
 github.com/bitfield/gotestdox v0.2.2 h1:x6RcPAbBbErKLnapz1QeAlf3ospg8efBsedU93CDsnE=
 github.com/bitfield/gotestdox v0.2.2/go.mod h1:D+gwtS0urjBrzguAkTM2wodsTQYFHdpx8eqRJ3N+9pY=
-github.com/ctrf-io/go-ctrf-json-reporter v0.0.12 h1:MnOii3IKVTiTmBBcNM/gXuPeu3QBB8EN/zdMiTgTgJU=
-github.com/ctrf-io/go-ctrf-json-reporter v0.0.12/go.mod h1:36bVomyu0b70mpxgIQVllRXYyQFPSS+CeHZTn7zxYzQ=
+github.com/ctrf-io/go-ctrf-json-reporter v0.0.14 h1:/Yyx+wedA4i62+M1r+/LLNIJ0XK8GV/y7CUTVq/JMcg=
+github.com/ctrf-io/go-ctrf-json-reporter v0.0.14/go.mod h1:36bVomyu0b70mpxgIQVllRXYyQFPSS+CeHZTn7zxYzQ=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dnephin/pflag v1.0.7 h1:oxONGlWxhmUct0YzKTgrpQv9AUA1wtPBn7zuSjJqptk=
