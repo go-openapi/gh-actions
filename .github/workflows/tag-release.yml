@@ -22,9 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    steps:
-      -
-        uses: ./.github/workflows/release.yml
-        with:
-          tag: ${{ github.ref_name }}
-          secrets: inherit
+    uses: ./.github/workflows/release.yml
+    with:
+      tag: ${{ github.ref_name }}
+      secrets: inherit

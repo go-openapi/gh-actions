@@ -128,9 +128,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    steps:
-      -
-        uses: ./.github/workflows/release.yml
-        with:
-          tag: ${{ needs.tag-release.outputs.next-tag}}
-          secrets: inherit
+    uses: ./.github/workflows/release.yml
+    with:
+      tag: ${{ needs.tag-release.outputs.next-tag}}
+      secrets: inherit
