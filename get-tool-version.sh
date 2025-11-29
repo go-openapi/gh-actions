@@ -17,6 +17,9 @@ case "${tool}" in
   gotestsum)
     GO_IMPORT_PATH="gotest.tools/gotestsum"
     ;;
+  svu)
+    GO_IMPORT_PATH="github.com/caarlos0/svu"
+    ;;
   *)
     echo "Unrecognized tool name"
     exit 1

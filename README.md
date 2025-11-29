@@ -17,7 +17,7 @@ GitHub Actions used by go-openapi workflows.
 
 ## Status
 
-This project is still in a very early stage. It is being actively developed and has not released yet.
+These actions are currently used by the CI workflows run at `github.com/go-openapi`.
 
 ## Usage
 
@@ -36,9 +36,19 @@ To use this action in your workflow, reference it using the standard GitHub Acti
 - uses: go-openapi/gh-actions/install/go-ctrf-json-reporter@v1
 ```
 
+## Installed tools
+
+All tools are currently installed using downloaded released binaries.
+
+* [gotestsum](https://github.com/gotestyourself/gotestsum/)
+* [go-junit-report](https://github.com/jstemmer/go-junit-report)
+* [go-ctrf-json-reporter](https://github.com/ctrf-io/go-ctrf-json-reporter)
+* [svu](https://github.com/caarlos0/svu)
+
 ## Motivation
 
-This repository currently exposes "installer" actions for some testing go tools and
+This repository currently exposes "installer" actions for some testing go tools.
+
 CI workflows may use and pin released actions instead of resorting to a `go install ...@latest`
 command.
 
@@ -78,8 +88,10 @@ This library ships under the [SPDX-License-Identifier: Apache-2.0](./LICENSE).
 [codeql-badge]: https://github.com/go-openapi/gh-actions/actions/workflows/codeql.yml/badge.svg
 [codeql-url]: https://github.com/go-openapi/gh-actions/actions/workflows/codeql.yml
 <!-- Badges: release & docker images  -->
-[release-badge]: https://badge.fury.io/go/github.com%2Fgo-openapi%2Fgh-actions.svg
-[release-url]: https://badge.fury.io/go/github.com%2Fgo-openapi%2Fgh-actions
+[release-badge]: https://badge.fury.io/gh/go-openapi%2Fgh-actions.svg
+[release-url]: https://badge.fury.io/gh/go-openapi%2Fgh-actions
+[gomod-badge]: https://badge.fury.io/go/github.com%2Fgo-openapi%2Fgh-actions.svg
+[gomod-url]: https://badge.fury.io/go/github.com%2Fgo-openapi%2Fgh-actions
 <!-- Badges: code quality  -->
 [gocard-badge]: https://goreportcard.com/badge/github.com/go-openapi/gh-actions
 [gocard-url]: https://goreportcard.com/report/github.com/go-openapi/gh-actions
