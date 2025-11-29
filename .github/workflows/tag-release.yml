@@ -19,10 +19,7 @@ jobs:
     # The previous tagging action does not trigger the normal release workflow
     # (github prevents cascading triggers from happening).
     name: Create release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
     uses: ./.github/workflows/release.yml
     with:
       tag: ${{ github.ref_name }}
-      secrets: inherit
+    secrets: inherit

@@ -125,10 +125,7 @@ jobs:
     # (github prevents cascading triggers from happening).
     name: Create release
     needs: [ tag-release ]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
     uses: ./.github/workflows/release.yml
     with:
       tag: ${{ needs.tag-release.outputs.next-tag}}
-      secrets: inherit
+    secrets: inherit
