@@ -101,13 +101,13 @@ jobs:
           git_tag_gpgsign: true
       -
         name: Create and sign tag
+        env:
+          NEXT_TAG: ${{ steps.bump-release.outputs.next-tag }}
+          MESSAGE_TITLE: ${{ inputs.tag-message-title }}
+          MESSAGE_BODY: ${{ inputs.tag-message-body }}
         run: |
-          # construct tag message
+          # construct the tag message
           set -x
-          NEXT_TAG='${{ steps.bump-release.outputs.next-tag }}'
-          MESSAGE_TITLE='${{ inputs.tag-message-title }}'
-          MESSAGE_BODY='${{ inputs.tag-message-body }}'
-
           MESSAGE="${MESSAGE_TITLE}"
           if [[ -n "${MESSAGE_BODY}" ]] ; then
             BODY=$(echo "${MESSAGE_BODY}"|tr '|' '\n')
