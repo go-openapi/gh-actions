@@ -42,16 +42,13 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     if: ${{ github.event.pull_request.user.login == 'bot-go-openapi[bot]' }}
+    env:
+      PR_URL: ${{github.event.pull_request.html_url}}
+      GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
     steps:
       -
         name: Auto-approve all bot-go-openapi PRs
-        env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: gh pr review --approve "$PR_URL"
       -
         name: Auto-merge bot-go-openapi PRs
-        env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: gh pr merge --auto --rebase "$PR_URL"

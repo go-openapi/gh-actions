@@ -78,16 +78,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PR_URL: ${{needs.update-contributors.outputs.pull-request-url}}
+      GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
     steps:
       -
         name: Auto-approve PR
-        env:
-          PR_URL: ${{needs.update-contributors.outputs.pull-request-url}}
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: gh pr review --approve "$PR_URL"
       -
         name: Auto-merge PR
-        env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: gh pr merge --auto --rebase "$PR_URL"
