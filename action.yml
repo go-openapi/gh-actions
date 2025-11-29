@@ -2,43 +2,80 @@ name: go-openapi composite action
 description: |
   Composite github action for go-openapi workflows.
 
-  It installs the following test tools from binary releases:
+  Installs the following test tools from binary releases:
 
   * gotestsum
   * go-junit-report
   * go-ctrf-json-reporter
+  * svu
 
   Please refer to [the documentation](./README.md).
 
 author: go-openapi
 
 inputs:
+  install-gotestsum:
+    default: 'true'
+    required: false
   version-gotestsum:
     default: auto
+    required: false
+    description: |
+      The version to install specifically.
+      Defaults to 'auto': the version currenty released (see go.mod).
+  install-go-junit-report:
+    default: 'true'
     required: false
   version-go-junit-report:
     default: auto
     required: false
+    description: |
+      The version to install specifically.
+      Defaults to 'auto': the version currenty released (see go.mod).
+  install-go-ctrf-json-reporter:
+    default: 'true'
+    required: false
   version-go-ctrf-json-reporter:
     default: auto
     required: false
+    description: |
+      The version to install specifically.
+      Defaults to 'auto': the version currenty released (see go.mod).
+  install-svu:
+    default: 'true'
+    required: false
+  version-svu:
+    default: auto
+    required: false
+    description: |
+      The version to install specifically.
+      Defaults to 'auto': the version currenty released (see go.mod).
 
 runs:
   using: composite
   steps:
     - 
+      if: ${{ inputs.install-gotestsum == 'true' }}
       name: Install gotestsum
       uses: ./install/gotestsum
       with:
         version: ${{ inputs.version-gotestsum }}
     - 
+      if: ${{ inputs.install-go-junit-report == 'true' }}
       name: Install go-junit-report
       uses: ./install/go-junit-report
       with:
         version: ${{ inputs.version-go-junit-report }}
     - 
+      if: ${{ inputs.install-go-ctrf-json-reporter == 'true' }}
       name: Install go-ctrf-json-reporter
       uses: ./install/go-ctrf-json-reporter
+      with:
+        version: ${{ inputs.version-go-ctrf-json-reporter }}
+    - 
+      if: ${{ inputs.install-svu == 'true' }}
+      name: Install svu
+      uses: ./install/svu
       with:
         version: ${{ inputs.version-go-ctrf-json-reporter }}
 

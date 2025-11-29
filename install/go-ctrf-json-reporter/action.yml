@@ -4,9 +4,6 @@ description: |
 
   github.com/ctrf-io/go-ctrf-json-reporter@{version}
 
-  NOTE: go-ctrf-json-report doesn't currently issue binary releases:
-  so this is a go build that requires a go install.
-
 author: go-openapi
 
 inputs:
@@ -26,6 +23,20 @@ outputs:
 runs:
   using: composite
   steps:
+    -
+      name: Check if runner is supported
+      if: >-
+        ${{
+          (runner.os != 'Linux' && runner.os != 'macOS' && runner.os != 'Windows') ||
+          (runner.os == 'Linux' && runner.arch != 'X64' ) ||
+          (runner.os == 'Windows' && runner.arch != 'X64' ) ||
+          (runner.os == 'macOS' && runner.arch != 'ARM64')
+        }}
+      shell: bash
+      run: |
+          echo "::error::installation not supported for ${{ runner.os }} on ${{ runner.arch }}"
+          echo "::error::please build locally with go or see available artifacts at https://github.com/gotestyourself/gotestsum/releases"
+          exit 1
     -
       name: Resolve version
       id: resolve-version
@@ -54,11 +65,36 @@ runs:
         REPO: github.com/ctrf-io/go-ctrf-json-reporter
         TOOL: go-ctrf-json-reporter
         VERSION: ${{ steps.resolve-version.outputs.version }}
+        DOWNLOAD_DIR: ${{ runner.temp }}/downloads
+        TARGET_DIR: ${{ github.action_path }}/bin
+        GH_TOKEN: ${{ github.token }}
       run: |
-        set -x
-        go install "${REPO}"/cmd/"${TOOL}"@"${VERSION}"
-        TARGET_DIR=${GOPATH:-${HOME}/go}/bin
-        echo "${TARGET_DIR}/bin" >> "$GITHUB_PATH"
+        OS=$(echo '${{ runner.os }}'|sed 's/macOS/Darwin/')
+        ARCH=$(echo '${{ runner.arch }}'|tr '[A-Z]' '[a-z]'|sed 's/x64/x86_64/')
+
+        mkdir -p "${DOWNLOAD_DIR}"
+
+        ARCHIVE_FORMAT=".tar.gz"
+        if [[ "${OS}" == "Windows" ]] ; then
+          ARCHIVE_FORMAT=".zip"
+        fi
+
+        gh release download "${VERSION}" \
+          --repo "${REPO}" \
+          --pattern "*_${OS}_${ARCH}${ARCHIVE_FORMAT}" \
+          --output "${DOWNLOAD_DIR}"/"artifact${ARCHIVE_FORMAT}"
+
+        if [[ "${OS}" != "Windows" ]] ; then
+          (cd "${DOWNLOAD_DIR}" && tar xf "artifact${ARCHIVE_FORMAT}" "${TOOL}" && rm -f "artifact${ARCHIVE_FORMAT}")
+        else
+          TOOL="${TOOL}.exe"
+          (cd "${DOWNLOAD_DIR}" && unzip "artifact${ARCHIVE_FORMAT}" "${TOOL}" && rm -f "artifact${ARCHIVE_FORMAT}")
+        fi
+
+        mkdir -p "${TARGET_DIR}"
+        mv "${DOWNLOAD_DIR}"/"${TOOL}" "${TARGET_DIR}"
+
+        echo '${{ github.action_path }}/bin' >> "$GITHUB_PATH"
 
 branding:
   icon: 'package'

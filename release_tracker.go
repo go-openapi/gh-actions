@@ -6,6 +6,7 @@ package main
 
 import (
 	// used to track dependencies using dependabot.
+	_ "github.com/caarlos0/svu/v3/pkg/svu"
 	_ "github.com/ctrf-io/go-ctrf-json-reporter/ctrf"
 	_ "github.com/jstemmer/go-junit-report/v2/gtr"
 	_ "github.com/jstemmer/go-junit-report/v2/junit"

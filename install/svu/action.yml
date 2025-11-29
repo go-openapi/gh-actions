@@ -1,8 +1,8 @@
-name: go-junit-report installer
+name: svu installer
 description: |
-  Download the latest vetted version of go-junit-report.
+  Download the latest vetted version of svu.
 
-  jstemmer/go-junit-report@{version}
+  github.com/caarlos0/svu@{version}
 
 author: go-openapi
 
@@ -42,11 +42,11 @@ runs:
       id: resolve-version
       shell: bash
       env:
-        TOOL: go-junit-report
+        TOOL: svu
         VERSION_RESOLVER: '${{ github.action_path }}/../../get-tool-version.sh'
       run: |
         if [[ '${{ !inputs.version }}' == 'true' || '${{ inputs.version }}' == 'auto' ]] ; then
-          VERSION=$("${VERSION_RESOLVER}" "${TOOL}")
+            VERSION=$("${VERSION_RESOLVER}" "${TOOL}")
         else
           VERSION='${{ inputs.version }}'
         fi
@@ -59,14 +59,14 @@ runs:
         echo "::notice title=Version:${VERSION}"
         echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
     -
-      name: Install go-junit-report
+      name: Install svu
       shell: bash
       env:
-        REPO: jstemmer/go-junit-report
+        REPO: github.com/caarlos0/svu
+        TOOL: svu
+        VERSION: ${{ steps.resolve-version.outputs.version }}
         DOWNLOAD_DIR: ${{ runner.temp }}/downloads
         TARGET_DIR: ${{ github.action_path }}/bin
-        TOOL: go-junit-report
-        VERSION: ${{ steps.resolve-version.outputs.version }}
         GH_TOKEN: ${{ github.token }}
       run: |
         OS=$(echo '${{ runner.os }}'|tr '[A-Z]' '[a-z]'|sed 's/macos/darwin/')
@@ -74,18 +74,19 @@ runs:
 
         mkdir -p "${DOWNLOAD_DIR}"
 
-        set -x
         ARCHIVE_FORMAT=".tar.gz"
-        if [[ '${{ runner.os }}' == 'Windows' ]] ; then
+        if [[ "${OS}" == 'windows' ]] ; then
           ARCHIVE_FORMAT=".zip"
+        elif [[ "${OS}" == 'darwin' ]] ; then
+          ARCH="all"
         fi
 
         gh release download "${VERSION}" \
           --repo "${REPO}" \
-          --pattern "*-${OS}-${ARCH}${ARCHIVE_FORMAT}" \
+          --pattern "*_${OS}_${ARCH}${ARCHIVE_FORMAT}" \
           --output "${DOWNLOAD_DIR}"/"artifact${ARCHIVE_FORMAT}"
 
-        if [[ "${OS}" != "windows" ]] ; then
+        if [[ "${OS}" != 'windows' ]] ; then
           (cd "${DOWNLOAD_DIR}" && tar xf "artifact${ARCHIVE_FORMAT}" "${TOOL}" && rm -f "artifact${ARCHIVE_FORMAT}")
         else
           TOOL="${TOOL}.exe"
