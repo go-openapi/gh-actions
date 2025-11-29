@@ -16,6 +16,8 @@ jobs:
       pull-requests: write
       contents: write
     runs-on: ubuntu-latest
+    outputs:
+      pull-request-url: ${{ steps.create-pull-request.outputs.pull-request-url }}
     steps:
     -
       name: Checkout repository
@@ -60,10 +62,11 @@ jobs:
         title: "doc: updated contributors file"
         token: ${{ steps.app-token.outputs.token }}
         labels: "bot"
-        draft: true
+        draft: false
         assignees: fredbi
         reviewers: fredbi
         sign-commits: true
+        signoff: true # DCO
 
   auto-merge:
     # description: |
@@ -72,5 +75,19 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: ./.github/workflows/auto-merge.yml
-    secrets: inherit
+    runs-on: ubuntu-latest
+    env:
+      PR_URL: ${{needs.update-contributors.outputs.pull-request-url}}
+    steps:
+      -
+        name: Auto-approve PR
+        env:
+          PR_URL: ${{needs.update-contributors.outputs.pull-request-url}}
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: gh pr review --approve "$PR_URL"
+      -
+        name: Auto-merge PR
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: gh pr merge --auto --rebase "$PR_URL"
