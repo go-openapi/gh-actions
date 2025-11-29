@@ -32,8 +32,14 @@ on:
         type: boolean
         required: false
         default: false
-      tag-message:
-        description: Tag message to prepend to the release notes
+      tag-message-title:
+        description: Tag message title to prepend to the release notes
+        required: false
+        type: string
+      tag-message-body:
+        description: |
+          Tag message body to prepend to the release notes.
+          (use "|" to replace end of line).
         required: false
         type: string
 
@@ -66,10 +72,23 @@ jobs:
             echo "error::invalid options::One of bump-patch, bump-minor or bump-major must be true"
             exit 1
           fi
+
+          if [[ -z "${NEXT_TAG}" ]] ; then
+            echo "error::something went wrong and no tag has been determined. Stopping here"
+            exit 1
+          fi
+
           echo "next-tag=${NEXT_TAG}" >> "$GITHUB_OUTPUT"
+          echo "notice title=next-tag:${NEXT_TAG}"
       -
         name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec # v6.3.0
+        # This is using the GPG signature of bot-go-openapi.
+        #
+        # CI_BOT_GPG_PRIVATE_KEY: the bot gpg key, armored
+        # CI_BOT_GPG_PASSPHRASE: the bot gpg passphrase
+        # CI_BOT_SIGNING_KEY: the fingerprint of the subkey used (space removed)
+        # NOTE(fredbi): extracted w/ gpg -K --homedir gnupg --keyid-format LONG --with-keygrip --fingerprint --with-subkey-fingerprint
         with:
           gpg_private_key: ${{ secrets.CI_BOT_GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.CI_BOT_GPG_PASSPHRASE }}
@@ -80,9 +99,20 @@ jobs:
       -
         name: Create and sign tag
         run: |
-          git tag -s -m '${{ inputs.tag-message }}' '${{ steps.bump-release.outputs.next-tag }}'
-          git tag -v '${{ steps.bump-release.outputs.next-tag }}'
-          #git push origin '${{ steps.bump-release.outputs.next-tag }}'
+          # construct tag message
+          NEXT_TAG='${{ steps.bump-release.outputs.next-tag }}'
+          MESSAGE_TITLE='${{ inputs.tag-message-title }}'
+          MESSAGE_BODY='${{ inputs.tag-message-body }}'
+
+          MESSAGE="${MESSAGE_TITLE}"
+          if [[ -n "${MESSAGE_BODY}" ]] ; then
+            BODY=$(echo "${MESSAGE_BODY}"|tr '|' '\n')
+            MESSAGE=$(printf "%s\n%s\n" "${MESSAGE}" "${BODY}")
+          fi
+
+          git tag -s -m "${MESSAGE}" 
+          git tag -v "${NEXT_TAG}"
+          git push origin "${NEXT_TAG}"
 
   gh-release:
     # trigger release creation explictly.
@@ -90,7 +120,6 @@ jobs:
     # (github prevents cascading triggers from happening).
     name: Create release
     needs: [ tag-release ]
-    if: ${{ 'true' == 'false' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
