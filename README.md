@@ -76,6 +76,11 @@ This library ships under the [SPDX-License-Identifier: Apache-2.0](./LICENSE).
 * [All-time contributors](./CONTRIBUTORS.md)
 * [Contributing guidelines](.github/CONTRIBUTING.md)
 
+## Cut a release
+
+Maintainers can cut a new release using
+[this workflow](https://github.com/go-openapi/gh-actions/actions/workflows/bump-release.yml).
+
 <!-- Badges: status  -->
 [test-badge]: https://github.com/go-openapi/gh-actions/actions/workflows/test.yml/badge.svg
 [test-url]: https://github.com/go-openapi/gh-actions/actions/workflows/test.yml
