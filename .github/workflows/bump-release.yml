@@ -100,6 +100,7 @@ jobs:
         name: Create and sign tag
         run: |
           # construct tag message
+          set -x
           NEXT_TAG='${{ steps.bump-release.outputs.next-tag }}'
           MESSAGE_TITLE='${{ inputs.tag-message-title }}'
           MESSAGE_BODY='${{ inputs.tag-message-body }}'
@@ -110,7 +111,7 @@ jobs:
             MESSAGE=$(printf "%s\n%s\n" "${MESSAGE}" "${BODY}")
           fi
 
-          git tag -s -m "${MESSAGE}" 
+          git tag -s -m "${MESSAGE}" "${NEXT_TAG}"
           git tag -v "${NEXT_TAG}"
           git push origin "${NEXT_TAG}"
 
