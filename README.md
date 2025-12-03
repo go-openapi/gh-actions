@@ -9,7 +9,7 @@
 <!-- Badges: documentation & support -->
 <!-- Badges: others & stats -->
 <!-- Slack badge disabled until I am able to restore a valid link to the chat -->
-[![GoDoc][godoc-badge]][godoc-url] <!-- [![Slack Channel][slack-badge]][slack-url] -->[![go version][goversion-badge]][goversion-url] ![Top language][top-badge] ![Commits since latest release][commits-badge]
+[![GoDoc][godoc-badge]][godoc-url] [![Slack Channel][slack-logo]![slack-badge]][slack-url] [![go version][goversion-badge]][goversion-url] ![Top language][top-badge] ![Commits since latest release][commits-badge]
 
 ---
 
@@ -111,8 +111,9 @@ Maintainers can cut a new release by either:
 [doc-url]: https://goswagger.io/go-openapi
 [godoc-badge]: https://pkg.go.dev/badge/github.com/go-openapi/gh-actions
 [godoc-url]: http://pkg.go.dev/github.com/go-openapi/gh-actions
-[slack-badge]: https://slackin.goswagger.io/badge.svg
-[slack-url]: https://slackin.goswagger.io
+[slack-logo]: https://a.slack-edge.com/e6a93c1/img/icons/favicon-32.png
+[slack-badge]: https://img.shields.io/badge/slack-blue?link=https%3A%2F%2Fgoswagger.slack.com%2Farchives%2FC04R30YM
+[slack-url]: https://goswagger.slack.com/archives/C04R30YMU
 <!-- Badges: license & compliance -->
 [license-badge]: http://img.shields.io/badge/license-Apache%20v2-orange.svg
 [license-url]: https://github.com/go-openapi/gh-actions/?tab=Apache-2.0-1-ov-file#readme
