@@ -43,7 +43,7 @@ To use this action in your workflow, reference it using the standard GitHub Acti
 - uses: go-openapi/gh-actions/install/go-ctrf-json-reporter@v0.1.6
   with:
     version: v0.0.12
-```yaml
+```
 
 ## Installed tools
 
