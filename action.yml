@@ -1,14 +1,7 @@
 name: go-openapi composite action
 description: |
   Composite github action for go-openapi workflows.
-
-  Installs the following test tools from binary releases:
-
-  * gotestsum
-  * go-junit-report
-  * go-ctrf-json-reporter
-  * svu
-
+  Installs the test tools from binary releases.
   Please refer to [the documentation](./README.md).
 
 author: go-openapi

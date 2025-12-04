@@ -26,15 +26,24 @@ To use this action in your workflow, reference it using the standard GitHub Acti
 * Install all tools
 
 ```yaml
-- uses: go-openapi/gh-actions@v1
+- uses: go-openapi/gh-actions@v0.1.6
 ```
 
 * Install each tool independently
 ```yaml
-- uses: go-openapi/gh-actions/install/gotestsum@v1
-- uses: go-openapi/gh-actions/install/go-junit-report@v1
-- uses: go-openapi/gh-actions/install/go-ctrf-json-reporter@v1
+- uses: go-openapi/gh-actions/install/gotestsum@v0.1.6
+- uses: go-openapi/gh-actions/install/go-junit-report@v0.1.6
+- uses: go-openapi/gh-actions/install/go-ctrf-json-reporter@v0.1.6
+- uses: go-openapi/gh-actions/install/svu@v0.1.6
 ```
+
+* Download a specific version
+
+```yaml
+- uses: go-openapi/gh-actions/install/go-ctrf-json-reporter@v0.1.6
+  with:
+    version: v0.0.12
+```yaml
 
 ## Installed tools
 
