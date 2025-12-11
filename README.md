@@ -53,9 +53,7 @@ All tools are currently installed using downloaded released binaries.
 * [go-ctrf-json-reporter](https://github.com/ctrf-io/go-ctrf-json-reporter)
 * [svu](https://github.com/caarlos0/svu)
 
-## Motivation
-
-This repository currently exposes "installer" actions for some testing go tools.
+### Background
 
 CI workflows may use and pin released actions instead of resorting to a `go install ...@latest`
 command.
@@ -69,6 +67,26 @@ Automated version tracking is obtained thanks to a dummy `go.mod` module declara
 which allows dependabot to track our target tools and post updates.
 
 A vulnerability scan on the source repo of the tools must be passed for such an update to be approved and merged.
+
+## Additional reusable actions
+
+* [wait-pending-jobs](ci-jobs): an action that waits for all jobs to have run (not just status checks) on a PR
+
+```yaml
+- uses: go-openapi/gh-actions/ci-jobs/wait-pending-jobs@v0.2.0
+  with:
+    pr-url: ${{ github.event.pull_request.html_url }}
+    gh-token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### Background
+
+This action solves a timing issue where:
+
+1. Auto-merge triggers as soon as required status checks pass
+2. Non-required jobs (like coverage upload) are still running
+3. The PR gets merged and branch deleted while jobs are still in progress
+4. Running jobs fail because the branch no longer exists
 
 ## Change log
 

@@ -1,0 +1,108 @@
+# SPDX-FileCopyrightText: Copyright 2015-2025 go-swagger maintainers
+# SPDX-License-Identifier: Apache-2.0
+#
+
+name: wait-pending-jobs
+description: |
+  Waits for all workflow runs associated with a PR's head SHA to complete.
+
+  This is useful in auto-merge scenarios where you want to ensure all jobs
+  (including non-required status checks like coverage uploads) finish before
+  the PR is merged and the branch is deleted.
+
+  NOTE: requires a checkout prior to execute.
+
+author: go-openapi
+
+inputs:
+  pr-url:
+    description: |
+      The full URL of the pull request to wait for.
+
+      Example: https://github.com/owner/repo/pull/123
+    required: true
+  max-wait-seconds:
+    description: |
+      Maximum time to wait for workflow runs to complete (in seconds).
+
+      Default: 600 (10 minutes)
+    required: false
+    default: '600'
+  poll-interval-seconds:
+    description: |
+      Time between status checks (in seconds).
+
+      Default: 10
+    required: false
+    default: '10'
+  github-token:
+    description: |
+      GitHub token with permissions to read workflow runs.
+
+      Typically: ${{ secrets.GITHUB_TOKEN }}
+    required: true
+
+outputs:
+  completed:
+    description: |
+      'true' if all workflows completed within max-wait-seconds, 'false' if timed out
+    value: ${{ steps.wait.outputs.completed }}
+  total-runs:
+    description: Number of workflow runs found for the PR's head SHA
+    value: ${{ steps.wait.outputs.total-runs }}
+
+runs:
+  using: composite
+  steps:
+    -
+      name: Wait for all workflow runs to complete
+      id: wait
+      shell: bash
+      env:
+        PR_URL: ${{ inputs.pr-url }}
+        MAX_WAIT: ${{ inputs.max-wait-seconds }}
+        SLEEP_INTERVAL: ${{ inputs.poll-interval-seconds }}
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: |
+        PR_NUMBER=$(echo "${PR_URL}" | grep -oP '\d+$')
+        echo "Waiting for all workflow runs to complete on PR #${PR_NUMBER}..."
+
+        # Get the PR's head SHA
+        HEAD_SHA=$(gh pr view "${PR_NUMBER}" --json headRefOid --jq '.headRefOid')
+        echo "Head SHA: ${HEAD_SHA}"
+
+        ELAPSED=0
+
+        while [ $ELAPSED -lt $MAX_WAIT ]; do
+          # Get all workflow runs for this SHA using the GitHub API
+          RUNS=$(gh api "/repos/${{ github.repository }}/actions/runs?head_sha=${HEAD_SHA}&per_page=100" --jq '.workflow_runs')
+
+          # Count how many are still in progress, queued, or waiting
+          IN_PROGRESS=$(echo "${RUNS}" | jq '[.[] | select(.status == "in_progress" or .status == "queued" or .status == "waiting")] | length')
+
+          if [ "$IN_PROGRESS" -eq 0 ]; then
+            echo "::notice::All workflow runs completed for SHA ${HEAD_SHA}"
+            TOTAL_RUNS=$(echo "${RUNS}" | jq 'length')
+            echo "Total workflow runs: ${TOTAL_RUNS}"
+            echo "completed=true" >> "$GITHUB_OUTPUT"
+            echo "total-runs=${TOTAL_RUNS}" >> "$GITHUB_OUTPUT"
+
+            exit 0
+          fi
+
+          # Show which workflows are still running
+          RUNNING=$(echo "${RUNS}" | jq -r '.[] | select(.status == "in_progress" or .status == "queued" or .status == "waiting") | .name' | tr '\n' ', ' | sed 's/,$//')
+          echo "Still waiting for ${IN_PROGRESS} workflow run(s): ${RUNNING}"
+
+          sleep $SLEEP_INTERVAL
+          ELAPSED=$((ELAPSED + SLEEP_INTERVAL))
+        done
+
+        echo "::warning::Timeout waiting for all workflow runs to complete after ${MAX_WAIT} seconds"
+        echo "completed=false" >> "$GITHUB_OUTPUT"
+        TOTAL_RUNS=$(echo "${RUNS}" | jq 'length')
+        echo "total-runs=${TOTAL_RUNS}" >> "$GITHUB_OUTPUT"
+
+branding:
+  icon: 'package'
+  color: 'blue'
