@@ -70,7 +70,9 @@ A vulnerability scan on the source repo of the tools must be passed for such an 
 
 ## Additional reusable actions
 
-* [wait-pending-jobs](ci-jobs): an action that waits for all jobs to have run (not just status checks) on a PR
+### wait-pending-jobs
+
+An action that waits for all jobs to have run (not just status checks) on a PR.
 
 ```yaml
 - uses: go-openapi/gh-actions/ci-jobs/wait-pending-jobs@v0.2.0
@@ -83,21 +85,83 @@ A vulnerability scan on the source repo of the tools must be passed for such an 
     exclude-workflow-patterns: 'auto-merge,release'
 ```
 
-### Background
+**Background:** This action solves a timing issue where auto-merge triggers as soon as required status checks pass, but non-required jobs (like coverage upload) are still running. The PR gets merged and branch deleted while jobs are still in progress, causing them to fail.
 
-This action solves a timing issue where:
-
-1. Auto-merge triggers as soon as required status checks pass
-2. Non-required jobs (like coverage upload) are still running
-3. The PR gets merged and branch deleted while jobs are still in progress
-4. Running jobs fail because the branch no longer exists
-
-When multiple jobs in the same workflow use this action in parallel (e.g., both `dependabot` and `actions-bot` jobs), they can end up waiting for each other. The action includes smart defaults to prevent deadlocks:
+When multiple jobs in the same workflow use this action in parallel, they can end up waiting for each other. The action includes smart defaults to prevent deadlocks:
 
 * `exclude-current-run`: Automatically excludes the current workflow run from the wait list (default: `true`)
 * `exclude-workflow-patterns`: Case-insensitive pattern matching against workflow names (default: `'auto-merge,contributors'`)
   - Patterns use substring matching: `'auto-merge'` matches `'Dependabot auto-merge'`, `'PR auto-merge'`, etc.
   - Override the default by providing your own comma-separated list of patterns
+
+### bot-credentials
+
+Securely configures bot credentials for automated operations including GPG signing and GitHub App authentication. This action addresses the security vulnerability where using `secrets[inputs.secret-name]` exposes ALL organization secrets to the workflow runner.
+
+**Features:**
+* GPG signing for commits and tags
+* GitHub App token generation
+* Both features can be enabled independently
+* Secure: only passes explicitly named secrets (not all secrets)
+* Flexible: works with custom secret names for any organization
+
+**Usage example 1: go-openapi repos (using default secret names)**
+
+For go-openapi repositories, the action automatically uses the organization's standard secret names (`CI_BOT_GPG_PRIVATE_KEY`, `CI_BOT_GPG_PASSPHRASE`, `CI_BOT_SIGNING_KEY`, `CI_BOT_APP_ID`, `CI_BOT_APP_PRIVATE_KEY`) when called with `secrets: inherit`:
+
+```yaml
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: go-openapi/gh-actions/ci-jobs/bot-credentials@master
+        id: bot
+        with:
+          enable-gpg-signing: 'true'
+          enable-github-app: 'true'
+          # No secret parameters needed! Falls back to go-openapi defaults
+          gpg-private-key: ${{ secrets.CI_BOT_GPG_PRIVATE_KEY }}
+          gpg-passphrase: ${{ secrets.CI_BOT_GPG_PASSPHRASE }}
+          gpg-fingerprint: ${{ secrets.CI_BOT_SIGNING_KEY }}
+          github-app-id: ${{ secrets.CI_BOT_APP_ID }}
+          github-app-private-key: ${{ secrets.CI_BOT_APP_PRIVATE_KEY }}
+      - run: |
+          git commit -m "Signed commit"  # Automatically GPG signed
+      - uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ steps.bot.outputs.app-token }}
+```
+
+**Usage example 2: Other organizations (using custom secret names)**
+
+For other organizations with different secret names (e.g., personal repos on `github.com/fredbi`):
+
+```yaml
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: go-openapi/gh-actions/ci-jobs/bot-credentials@master
+        id: bot
+        with:
+          enable-gpg-signing: 'true'
+          enable-github-app: 'true'
+          # Pass your custom secret names explicitly
+          gpg-private-key: ${{ secrets.FREDBI_GPG_PRIVATE_KEY }}
+          gpg-passphrase: ${{ secrets.FREDBI_GPG_PASSPHRASE }}
+          gpg-fingerprint: ${{ secrets.FREDBI_SIGNING_KEY }}
+          github-app-id: ${{ secrets.FREDBI_APP_ID }}
+          github-app-private-key: ${{ secrets.FREDBI_APP_PRIVATE_KEY }}
+      - run: |
+          git commit -m "Signed commit"  # Automatically GPG signed
+      - uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ steps.bot.outputs.app-token }}
+```
+
+**Background:** This action was created to solve the security issue identified in [ci-workflows#43](https://github.com/go-openapi/ci-workflows/pull/43). Using `secrets[inputs.secret-name]` causes GitHub Actions to expose ALL organization and repository secrets to the workflow runner. This action requires secrets to be passed as actual values, ensuring only explicitly named secrets are accessible.
 
 ## Change log
 

@@ -1,0 +1,160 @@
+# SPDX-FileCopyrightText: Copyright 2015-2025 go-swagger maintainers
+# SPDX-License-Identifier: Apache-2.0
+#
+
+name: bot-credentials
+description: |
+  Configure bot credentials for automated operations including GPG signing and GitHub App authentication.
+
+  This action supports two independent credential types:
+  1. GPG signing credentials for commit and tag signing
+  2. GitHub App credentials for token-based authentication
+
+  Both can be enabled independently or together depending on workflow needs.
+
+  Default values are configured for go-openapi organization repositories,
+  allowing existing workflows to work without any configuration changes.
+
+author: go-openapi
+
+inputs:
+  # GPG Signing Configuration
+  enable-gpg-signing:
+    description: |
+      Enable GPG signing for commits and tags.
+
+      When enabled, imports the GPG key and configures git to sign commits and tags.
+
+      Default: false
+    required: false
+    default: 'false'
+  gpg-private-key:
+    description: |
+      GPG private key in armored format.
+
+      This should be the actual secret value, not the secret name.
+      Pass it as: secrets.CI_BOT_GPG_PRIVATE_KEY
+
+      Required when enable-gpg-signing is true.
+    required: false
+  gpg-passphrase:
+    description: |
+      Passphrase to unlock the GPG private key.
+
+      This should be the actual secret value, not the secret name.
+      Pass it as: secrets.CI_BOT_GPG_PASSPHRASE
+
+      Required when enable-gpg-signing is true.
+    required: false
+  gpg-fingerprint:
+    description: |
+      Fingerprint of the GPG signing key (spaces removed).
+
+      This should be the actual secret value, not the secret name.
+      Pass it as: secrets.CI_BOT_SIGNING_KEY
+
+      Required when enable-gpg-signing is true.
+
+      NOTE: Extract with:
+      gpg -K --homedir gnupg --keyid-format LONG --with-keygrip --fingerprint --with-subkey-fingerprint
+    required: false
+  enable-commit-signing:
+    description: |
+      Enable commit signing when GPG signing is enabled.
+
+      Default: true
+    required: false
+    default: 'true'
+  enable-tag-signing:
+    description: |
+      Enable tag signing when GPG signing is enabled.
+
+      Default: true
+    required: false
+    default: 'true'
+
+  # GitHub App Configuration
+  enable-github-app:
+    description: |
+      Enable GitHub App token generation.
+
+      When enabled, creates a GitHub App installation token that can be used
+      for authenticated operations with elevated permissions.
+
+      Default: false
+    required: false
+    default: 'false'
+  github-app-id:
+    description: |
+      GitHub App ID.
+
+      This should be the actual secret value, not the secret name.
+      Pass it as: secrets.CI_BOT_APP_ID
+
+      Required when enable-github-app is true.
+    required: false
+  github-app-private-key:
+    description: |
+      GitHub App private key in PEM format.
+
+      This should be the actual secret value, not the secret name.
+      Pass it as: secrets.CI_BOT_APP_PRIVATE_KEY
+
+      Required when enable-github-app is true.
+    required: false
+
+outputs:
+  app-token:
+    description: |
+      GitHub App installation token.
+
+      Only available when enable-github-app is true.
+      Use this token for authenticated GitHub operations in subsequent steps.
+    value: ${{ steps.app-token.outputs.token }}
+
+runs:
+  using: composite
+  steps:
+    -
+      name: Validate GPG inputs
+      if: ${{ inputs.enable-gpg-signing == 'true' }}
+      shell: bash
+      run: |
+        if [[ -z "${{ inputs.gpg-private-key }}" || -z "${{ inputs.gpg-passphrase }}" || -z "${{ inputs.gpg-fingerprint }}" ]]; then
+          echo "::error::GPG signing is enabled but required credentials are missing"
+          echo "::error::Required: gpg-private-key, gpg-passphrase, gpg-fingerprint"
+          exit 1
+        fi
+    -
+      name: Import GPG key
+      if: ${{ inputs.enable-gpg-signing == 'true' }}
+      uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec # v6.3.0
+      with:
+        gpg_private_key: ${{ inputs.gpg-private-key }}
+        passphrase: ${{ inputs.gpg-passphrase }}
+        fingerprint: ${{ inputs.gpg-fingerprint }}
+        git_user_signingkey: true
+        git_commit_gpgsign: ${{ inputs.enable-commit-signing }}
+        git_tag_gpgsign: ${{ inputs.enable-tag-signing }}
+    -
+      name: Validate GitHub App inputs
+      if: ${{ inputs.enable-github-app == 'true' }}
+      shell: bash
+      run: |
+        if [[ -z "${{ inputs.github-app-id }}" || -z "${{ inputs.github-app-private-key }}" ]]; then
+          echo "::error::GitHub App is enabled but required credentials are missing"
+          echo "::error::Required: github-app-id, github-app-private-key"
+          exit 1
+        fi
+    -
+      name: Create GitHub App token
+      if: ${{ inputs.enable-github-app == 'true' }}
+      uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+      id: app-token
+      with:
+        app-id: ${{ inputs.github-app-id }}
+        private-key: ${{ inputs.github-app-private-key }}
+
+branding:
+  icon: 'key'
+  color: 'green'
