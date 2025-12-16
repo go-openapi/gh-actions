@@ -24,7 +24,7 @@ jobs:
       uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
     -
       name: Identify all-time contributors to this repository
-      uses: github/contributors@e345de71bbd056a34a70709afd4f4bf0a270cc1a # v1.7.7
+      uses: github/contributors@0d5adc3833e89ee1f4145744f5d69313cf5ea238 # v1.7.8
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         REPOSITORY:  ${{ github.repository }}
