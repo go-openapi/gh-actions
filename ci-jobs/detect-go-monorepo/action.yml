@@ -33,6 +33,15 @@ outputs:
       A JSON array of modules paths
     value: ${{ steps.detect-monorepo.outputs.paths }}
 
+  relative-names:
+    description: |
+      A JSON array of modules relative module names (relative imports).
+      The root module always yields an empty string.
+      These are pure relative paths without leading "." or "/".
+
+      Example: github.com/go-openapi/swag/jsonutils yields "jsonutils"
+    value: ${{ steps.detect-monorepo.outputs.relative-names }}
+
   bash-paths:
     description: |
       A bash-compatible array of modules paths.
@@ -42,6 +51,15 @@ outputs:
     description: |
       A bash-compatible array of modules paths with the "/..." suffix.
     value: ${{ steps.detect-monorepo.outputs.bash-subpaths }}
+
+  bash-relative-names:
+    description: |
+      A bash-compatible array of modules relative names (relative imports).
+      The root module always yields an empty string.
+      These are pure relative paths without leading "." or "/".
+
+      Example: github.com/go-openapi/swag/jsonutils yields "jsonutils"
+    value: ${{ steps.detect-monorepo.outputs.bash-relative-names }}
 
   names:
     description: |
@@ -70,6 +88,8 @@ runs:
         names=$(echo "${list}"|jq -sc 'map(.name)')
         bash_paths=$(echo "${list}" | jq '.path') # keep quoted elements
         bash_subpaths=$(echo "${list}" | jq '.path+"/..."') # keep quoted elements
+        relative_names=$(echo "${modules}"|jq -c --arg ROOT "${root}" '[.[]|.name|ltrimstr($ROOT)|ltrimstr("/")]')
+        bash_relative_names=$(echo "${modules}"|jq --arg ROOT "${root}" '.[]|.name|ltrimstr($ROOT)|ltrimstr("/")')
 
         echo "modules=${modules}" >> "${GITHUB_OUTPUT}"
         echo "::notice title=modules::${modules}"
@@ -91,6 +111,12 @@ runs:
 
         echo "modules-count=${count}" >> "${GITHUB_OUTPUT}"
         echo "::notice title=modules-count::${count}"
+
+        echo "relative-name=${relative_names}" >> "${GITHUB_OUTPUT}"
+        echo "::notice title=relative-names::${relative_names}"
+
+        echo "bash-relative-name=${bash_relative_names}" >> "${GITHUB_OUTPUT}"
+        echo "::notice title=bash_relative-names::${bash_relative_names}"
 
         if [[ "${count}" -gt 1 ]] ; then
           echo "is-monorepo=true" >> "${GITHUB_OUTPUT}"

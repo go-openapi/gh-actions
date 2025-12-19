@@ -212,6 +212,22 @@ outputs:
     description: |
       A JSON array of modules names (import paths)
 
+  relative-names:
+    description: |
+      A JSON array of modules relative module names (relative imports).
+      The root module always yields an empty string.
+      These are pure relative paths without leading "." or "/".
+
+      Example: github.com/go-openapi/swag/jsonutils yields "jsonutils"
+
+  bash-relative-names:
+    description: |
+      A bash-compatible array of modules relative names (relative imports).
+      The root module always yields an empty string.
+      These are pure relative paths without leading "." or "/".
+
+      Example: github.com/go-openapi/swag/jsonutils yields "jsonutils"
+
   root-module:
     description: |
       The name (go import path) of the root module in the go mono repo.
