@@ -332,6 +332,63 @@ jobs:
         # ...
 ```
 
+### Bump next tag
+
+This action uses svu to compute the next release tag depending on the request kind of bump (patch, minor, major).
+
+```yaml
+inputs:
+  bump-patch:
+    description: Bump a patch version release
+    type: string
+    required: false
+    default: 'true'
+  bump-minor:
+    description: Bump a minor version release
+    type: string
+    required: false
+    default: 'false'
+  bump-major:
+    description: Bump a major version release
+    type: string
+    required: false
+    default: 'false'
+```
+
+```yaml
+outputs:
+  next-tag:
+    description: |
+      The bumped release tag.
+```
+
+**Usage example**
+
+```yaml
+job:
+  determine-next-tag:
+    name: Determine next tag [monorepo]
+    needs: [detect-modules]
+    if: ${{ needs.detect-modules.outputs.is-monorepo == 'true' }}
+    runs-on: ubuntu-latest
+    outputs:
+      next-tag: ${{ steps.bump-release.outputs.next-tag }}
+    steps:
+      -
+        name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 0
+      -
+        name: Determine next tag
+        id: bump-release
+        uses: go-openapi/gh-actions/ci-jobs/next-tag@master # v1.4.0
+        with:
+          bump-patch: ${{ inputs.bump-patch }}
+          bump-minor: ${{ inputs.bump-minor }}
+          bump-major: ${{ inputs.bump-major }}
+```
+
 ## Change log
 
 See <https://github.com/go-openapi/gh-actions/releases>

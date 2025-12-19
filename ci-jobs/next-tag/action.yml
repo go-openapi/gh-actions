@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: Copyright 2015-2025 go-swagger maintainers
+# SPDX-License-Identifier: Apache-2.0
+#
+
+name: next-tag
+description: |
+  Determines the next release bump using svu.
+
+  By default, a patch version bump is issued.
+
+  Requires: checkout
+
+author: go-openapi
+
+inputs:
+  bump-patch:
+    description: Bump a patch version release
+    type: string
+    required: false
+    default: 'true'
+  bump-minor:
+    description: Bump a minor version release
+    type: string
+    required: false
+    default: 'false'
+  bump-major:
+    description: Bump a major version release
+    type: string
+    required: false
+    default: 'false'
+
+outputs:
+  next-tag:
+    description: |
+      The bumped release tag.
+    value: ${{ steps.bump-release.next-tag }}
+
+runs:
+  using: composite
+  steps:
+    -
+      name: install svu
+      uses: ../../install/svu
+    -
+      name: Bump release
+      id: bump-release
+      shell: bash
+      run: |
+        # determine next tag to push
+        NEXT_TAG=""
+        if   [[ '${{ inputs.bump-patch }}' == 'true' ]] ; then
+          NEXT_TAG=$(svu patch)
+        elif [[ '${{ inputs.bump-minor }}' == 'true' ]] ; then
+          NEXT_TAG=$(svu minor)
+        elif [[ '${{ inputs.bump-major }}' == 'true' ]] ; then
+          NEXT_TAG=$(svu major)
+        else
+          echo "::error::invalid options::One of bump-patch, bump-minor or bump-major must be true"
+          exit 1
+        fi
+
+        if [[ -z "${NEXT_TAG}" ]] ; then
+          echo "::error::something went wrong and no tag has been determined. Stopping here"
+          exit 1
+        fi
+
+        echo "next-tag=${NEXT_TAG}" >> "$GITHUB_OUTPUT"
+        echo "::notice title=next-tag::${NEXT_TAG}"
