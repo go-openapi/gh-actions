@@ -1,0 +1,52 @@
+# SPDX-FileCopyrightText: Copyright 2015-2025 go-swagger maintainers
+# SPDX-License-Identifier: Apache-2.0
+#
+
+name: detect-go-version
+description: |
+  Detects the installed go version and report about specific features
+  that the CI pipeline may use.
+
+  At this moment, the detected feature is the ability to run tests
+  with the "go test work" command, which is convenient for mono-repos.
+
+  Requires: go setup, git checkout
+
+author: go-openapi
+
+outputs:
+  go-minor-version:
+    description: |
+      The minor version of go that is installed.
+
+      Example: go1.25.4 yields 25
+    value: ${{ steps.detect-go-version.outputs.minor-version }}
+
+  is-gotestwork-supported:
+    description: |
+      Tells if go test work is available (e.g. go1.25 and go.work exists)
+    value: ${{ steps.detect-go-version.outputs.gotestwork }}
+
+runs:
+  using: composite
+  steps:
+    -
+      name: Detect go version
+      id: detect-go-version
+      shell: bash
+      run: |
+        go_minor_version=$(go version|cut -d' ' -f3|cut -d'.' -f2)
+        echo "minor-version=${go_minor_version}" >> "${GITHUB_OUTPUT}"
+        echo "::notice title=go minor version::${go_minor_version}"
+
+        if [[ "${go_minor_version}" -ge 25 && -f "go.work" ]] ; then
+          echo "gotestwork=true" >> "${GITHUB_OUTPUT}"
+          echo "::notice title=go test work supported::true"
+        else
+          echo "gotestwork=false" >> "${GITHUB_OUTPUT}"
+          echo "::notice title=go test work supported::false"
+        fi
+
+branding:
+  icon: 'key'
+  color: 'green'

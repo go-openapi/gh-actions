@@ -1,0 +1,105 @@
+# SPDX-FileCopyrightText: Copyright 2015-2025 go-swagger maintainers
+# SPDX-License-Identifier: Apache-2.0
+#
+
+name: detect-go-monorepo
+description: |
+  Detects if a golang git repo is a mono-repo with multiple modules
+  and outputs the list of modules with their location with various
+  formats (JSON, bash-compatible list).
+
+  Requires: go setup, git checkout
+
+author: go-openapi
+
+outputs:
+  is-monorepo:
+    description: |
+      Indicates if the current repo is a go mono repo.
+    value: ${{ steps.detect-monorepo.outputs.is-monorepo }}
+
+  modules-count:
+    description: |
+      Counts how many modules have been detected.
+    value: ${{ steps.detect-monorepo.outputs.modules-count }}
+
+  modules:
+    description: |
+      A JSON array of modules with name (go import path) and path (folder in the current checkout).
+    value: ${{ steps.detect-monorepo.outputs.modules }}
+
+  paths:
+    description: |
+      A JSON array of modules paths
+    value: ${{ steps.detect-monorepo.outputs.paths }}
+
+  bash-paths:
+    description: |
+      A bash-compatible array of modules paths.
+    value: ${{ steps.detect-monorepo.outputs.bash-paths }}
+
+  bash-subpaths:
+    description: |
+      A bash-compatible array of modules paths with the "/..." suffix.
+    value: ${{ steps.detect-monorepo.outputs.bash-subpaths }}
+
+  names:
+    description: |
+      A JSON array of modules names (import paths)
+    value: ${{ steps.detect-monorepo.outputs.names }}
+
+  root-module:
+    description: |
+      The name (go import path) of the root module in the go mono repo.
+    value: ${{ steps.detect-monorepo.outputs.root-module }}
+
+runs:
+  using: composite
+  steps:
+    -
+      name: Detect modules
+      id: detect-monorepo
+      shell: bash
+      run: |
+        root=$(go list)
+        list=$(go list -m -f '{"name":{{ printf "%q" .Path }},"path":{{ printf "%q" .Dir }}}')
+
+        modules=$(echo "${list}"|jq -sc) # single-line JSON
+        count=$(echo "${list}"|wc -l)
+        paths=$(echo "${list}"|jq -sc 'map(.path)')
+        names=$(echo "${list}"|jq -sc 'map(.name)')
+        bash_paths=$(echo "${list}" | jq '.path') # keep quoted elements
+        bash_subpaths=$(echo "${list}" | jq '.path+"/..."') # keep quoted elements
+
+        echo "modules=${modules}" >> "${GITHUB_OUTPUT}"
+        echo "::notice title=modules::${modules}"
+
+        echo "root-module=${root}" >> "${GITHUB_OUTPUT}"
+        echo "::notice title=root-module::${root}"
+
+        echo "paths=${paths}" >> "${GITHUB_OUTPUT}"
+        echo "::notice title=paths::${paths}"
+
+        echo "bash-paths=${bash_paths}" >> "${GITHUB_OUTPUT}"
+        echo "::notice title=bash-subpaths::${bash_paths}"
+
+        echo "bash-subpaths=${bash_subpaths}" >> "${GITHUB_OUTPUT}"
+        echo "::notice title=bash-subpaths::${bash_subpaths}"
+
+        echo "names=${names}" >> "${GITHUB_OUTPUT}"
+        echo "::notice title=names::${names}"
+
+        echo "modules-count=${count}" >> "${GITHUB_OUTPUT}"
+        echo "::notice title=modules-count::${count}"
+
+        if [[ "${count}" -gt 1 ]] ; then
+          echo "is-monorepo=true" >> "${GITHUB_OUTPUT}"
+          echo "::notice title=is-monorepo::true"
+        else
+          echo "is-monorepo=false" >> "${GITHUB_OUTPUT}"
+          echo "::notice title=is-monorepo::false"
+        fi
+
+branding:
+  icon: 'key'
+  color: 'green'

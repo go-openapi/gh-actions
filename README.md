@@ -173,6 +173,165 @@ jobs:
 
 **Background:** This action was created to solve the security issue identified in [ci-workflows#43](https://github.com/go-openapi/ci-workflows/pull/43). Using `secrets[inputs.secret-name]` causes GitHub Actions to expose ALL organization and repository secrets to the workflow runner. This action requires secrets to be passed as actual values, ensuring only explicitly named secrets are accessible.
 
+### detect-go-monorepo
+
+This action detects the presence of multiple go modules in a git repo (i.e. a go mono-repo).
+
+It returns a `is-monorepo` indicator and several ways to iterate over modules
+(by module import name, by folder, as JSON - e.g. for matrix jobs -, as bash-compatible lists).
+
+Requires: go setup, git checkout
+
+```yaml
+outputs:
+  is-monorepo:
+    description: |
+      Indicates if the current repo is a go mono repo.
+
+  modules-count:
+    description: |
+      Counts how many modules have been detected.
+
+  modules:
+    description: |
+      A JSON array of modules with name (go import path) and path (folder in the current checkout).
+
+  paths:
+    description: |
+      A JSON array of modules paths
+
+  bash-paths:
+    description: |
+      A bash-compatible array of modules paths.
+
+  bash-subpaths:
+    description: |
+      A bash-compatible array of modules paths with the "/..." suffix.
+
+  names:
+    description: |
+      A JSON array of modules names (import paths)
+
+  root-module:
+    description: |
+      The name (go import path) of the root module in the go mono repo.
+```
+
+**Usage example**
+
+```yaml
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    outputs:
+      is-monorepo: ${{ steps.detect-monorepo.outputs.is-monorepo }}
+      bash-subpaths: ${{ steps.detect-monorepo.outputs.bash-subpaths }}
+      module-names: ${{ steps.detect-monorepo.outputs.names }}
+    steps:
+      -
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 0
+      -
+        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+        with:
+          go-version: stable
+          check-latest: true
+          cache: true
+          cache-dependency-path: '**/go.sum'
+      -
+        name: Detect go mono-repo
+        id: detect-monorepo
+        uses: go-openapi/gh-actions/ci-jobs/detect-go-monorepo@master # v1.4.0
+      -
+        name: golangci-lint
+        if: ${{ steps.detect-monorepo.outputs.is-monorepo != 'true' }}
+        uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
+        with:
+          version: latest
+          only-new-issues: true
+          skip-cache: true
+
+      # Carry out the linting the traditional way, within a shell loop
+      -
+        name: Lint multiple modules
+        if: ${{ steps.detect-monorepo.outputs.is-monorepo == 'true' }}
+        # golangci-lint doesn't support go.work to lint multiple modules in one single pass
+        run: |
+          set -euxo pipefail
+          git fetch origin master
+          git show --no-patch --oneline origin/master
+          while read -r module_location ; do
+            pushd "${module_location}"
+            golangci-lint run --new-from-rev origin/master
+            popd
+          done < <(echo ${{ steps.detect-monorepo.outputs.bash-paths }})
+```
+
+### detect-go-version
+
+This action detects the current go version and reports the minor version.
+
+Its intent is to report about the availability of certain features useful for testing,
+that are not available in all instances of a matrix job spanning over multiple go versions.
+
+At this moment, we are mostly interested about the possibility to run a simplified test script
+using `go test work`.
+
+Requires: go setup, git checkout
+
+```yaml
+outputs:
+  go-minor-version:
+    description: |
+      The minor version of go that is installed.
+
+      Example: go1.25.4 yields 25
+
+  is-gotestwork-supported:
+    description: |
+      Tells if go test work is available (e.g. go1.25 and go.work exists)
+```
+
+**Usage example**
+
+```yaml
+jobs:
+  test:
+    name: Unit tests mono-repo
+    needs: [ lint ]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        go: ['oldstable', 'stable' ]
+    steps:
+      -
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      -
+        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+        id: go-setup
+        with:
+          go-version: '${{ matrix.go }}'
+          check-latest: true
+          cache: true
+          cache-dependency-path: '**/go.sum'
+      -
+        name: Detect go version capabilities
+        id: detect-go-version
+        uses: go-openapi/gh-actions/ci-jobs/detect-go-version@master # v1.4.0
+      -
+        name: Install gotestsum
+        uses: go-openapi/gh-actions/install/gotestsum@eb161ed408645b24aaf6120cd5e4a893cf2c0af2 # v1.3.1
+      -
+        name: Run unit tests on all modules (go1.25+ with go.work) [monorepo]
+        if: ${{ needs.lint.outputs.is-monorepo == 'true' && steps.detect-go-version.outputs.is-gotestwork-supported == 'true' }}
+        # with go.work file enabled, go test recognizes sub-modules and collects all packages to be covered
+        # without specifying -coverpkg.
+        # ...
+```
+
 ## Change log
 
 See <https://github.com/go-openapi/gh-actions/releases>
