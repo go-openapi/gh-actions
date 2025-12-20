@@ -45,20 +45,35 @@ outputs:
   bash-paths:
     description: |
       A bash-compatible array of modules paths.
+
+      The bash-compatible list is a list of blank separated, unquoted strings.
+      It is exposed to classical shell-escaping issues, but reads nicely into a bash array like so:
+
+      mapfile -d' ' -t ALL_FOLDERS < <(printf "%s" "${{ bash-paths }}") # bash 4 syntax
+
     value: ${{ steps.detect-monorepo.outputs.bash-paths }}
 
   bash-subpaths:
     description: |
       A bash-compatible array of modules paths with the "/..." suffix.
+
+      The bash-compatible list is a list of blank separated, unquoted strings.
+      It is exposed to classical shell-escaping issues.
+
     value: ${{ steps.detect-monorepo.outputs.bash-subpaths }}
 
   bash-relative-names:
     description: |
       A bash-compatible array of modules relative names (relative imports).
-      The root module always yields an empty string.
+      The root module always yields the string '{root}'.
+
       These are pure relative paths without leading "." or "/".
 
       Example: github.com/go-openapi/swag/jsonutils yields "jsonutils"
+
+      The bash-compatible list is a list of blank separated, unquoted strings.
+      It is exposed to classical shell-escaping issues.
+
     value: ${{ steps.detect-monorepo.outputs.bash-relative-names }}
 
   names:
@@ -81,15 +96,21 @@ runs:
       run: |
         root=$(go list)
         list=$(go list -m -f '{"name":{{ printf "%q" .Path }},"path":{{ printf "%q" .Dir }}}')
-
-        modules=$(echo "${list}"|jq -sc) # single-line JSON
         count=$(echo "${list}"|wc -l)
+
+        # JSON output
+        modules=$(echo "${list}"|jq -sc) # single-line JSON
         paths=$(echo "${list}"|jq -sc 'map(.path)')
         names=$(echo "${list}"|jq -sc 'map(.name)')
-        bash_paths=$(echo "${list}" | jq '.path') # keep quoted elements
-        bash_subpaths=$(echo "${list}" | jq '.path+"/..."') # keep quoted elements
         relative_names=$(echo "${modules}"|jq -c --arg ROOT "${root}" '[.[]|.name|ltrimstr($ROOT)|ltrimstr("/")]')
-        bash_relative_names=$(echo "${modules}"|jq --arg ROOT "${root}" '.[]|.name|ltrimstr($ROOT)|ltrimstr("/")')
+
+        # bash-compatible outputs
+        # - space-separated, unquoted strings (like for a bash array). Sensitive to classical shell escaping issues.
+        # Might need to add jq filter @sh if escaping becomes a problem, at the expanse of more complex output handling.
+        bash_paths=$(echo "${list}" | jq -r '.path'|tr '\n' ' '|sed -E 's/\s{2,}/ /g'|sed -E 's/\s+$//')
+        bash_relative_names=$(echo "${modules}"|jq -r --arg ROOT "${root}" '.[]|.name|ltrimstr($ROOT)|ltrimstr("/")|sub("^$";"{root}")'|tr '\n' ' '|sed -E 's/\s+/ /g'|sed -E 's/\s+$//')
+        # subpaths are designated to match with go test syntax, e.g. {path}/...
+        bash_subpaths=$(echo "${list}" | jq -r '.path+"/..."'|tr '\n' ' '|sed -E 's/\s{2,}/ /g'|sed -E 's/\s+$//')
 
         echo "modules=${modules}" >> "${GITHUB_OUTPUT}"
         echo "::notice title=modules::${modules}"
