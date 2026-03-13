@@ -40,7 +40,7 @@ runs:
   steps:
     -
       name: install svu
-      uses: go-openapi/gh-actions/install/svu@00f8939fb0771da06b0c115b9e011a7c321e0df4
+      uses: go-openapi/gh-actions/install/svu@11145fb6068468e0aa20a7b12552be02119605a0
     -
       name: Bump release
       id: bump-release
