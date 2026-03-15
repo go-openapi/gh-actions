@@ -31,3 +31,6 @@ ghactions
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# MCP config
+.mcp.json
