@@ -24,7 +24,7 @@ jobs:
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     -
       name: Identify all-time contributors to this repository
-      uses: github/contributors@d699725600f8a639710957615aedd7f5368b6cba # v2.0.3
+      uses: github/contributors@08ba1193dde975b1e1e5b0a4de4d4576be865c5c # v2.0.4
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         REPOSITORY:  ${{ github.repository }}
@@ -36,7 +36,7 @@ jobs:
         mv contributors.md CONTRIBUTORS.md
     -
       name: Switch to go-openapi bot user
-      uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+      uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
       id: app-token
       with:
         app-id: ${{ secrets.CI_BOT_APP_ID }}
