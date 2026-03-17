@@ -102,6 +102,23 @@ inputs:
 
       Required when enable-github-app is true.
     required: false
+  github-app-owner:
+    description: |
+      GitHub organization or user that owns the target repository.
+
+      When specified, the token is scoped to repositories owned by this entity
+      instead of the current repository's installation.
+
+      Optional. Only needed for cross-repo token scoping.
+    required: false
+  github-app-repositories:
+    description: |
+      Comma-separated list of repository names to scope the token to.
+
+      Used together with github-app-owner for cross-repo access.
+
+      Optional. Only needed for cross-repo token scoping.
+    required: false
 
 outputs:
   app-token:
@@ -154,6 +171,8 @@ runs:
       with:
         app-id: ${{ inputs.github-app-id }}
         private-key: ${{ inputs.github-app-private-key }}
+        owner: ${{ inputs.github-app-owner }}
+        repositories: ${{ inputs.github-app-repositories }}
 
 branding:
   icon: 'key'
