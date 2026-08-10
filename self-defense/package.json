@@ -1,0 +1,29 @@
+{
+  "name": "@go-openapi/self-defense",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Spam triage for go-openapi issues and pull requests",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "npm run build:evaluate && npm run build:train && npm run build:collect",
+    "build:evaluate": "esbuild src/entry/evaluate.ts --bundle --platform=node --target=node24 --format=esm --outfile=dist/evaluate.js --banner:js=\"// SPDX-License-Identifier: Apache-2.0\"",
+    "build:train": "esbuild src/entry/train.ts --bundle --platform=node --target=node24 --format=esm --outfile=dist/train.js --external:onnxruntime-node --banner:js=\"// SPDX-License-Identifier: Apache-2.0\"",
+    "build:collect": "esbuild src/entry/collect.ts --bundle --platform=node --target=node24 --format=esm --outfile=dist/collect.js --banner:js=\"// SPDX-License-Identifier: Apache-2.0\"",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types 'src/**/*.test.ts'",
+    "lint": "eslint src",
+    "check-dist": "npm run build && git diff --exit-code -- dist/"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.0"
+  },
+  "dependencies": {
+    "yaml": "^2.6.0"
+  }
+}

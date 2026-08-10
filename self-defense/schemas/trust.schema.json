@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/go-openapi/gh-actions/self-defense/schemas/trust.schema.json",
+  "title": "Self-defense trust file",
+  "description": "data/trust/trust.yaml. Human-owned, changed only by pull request. Replaces fossier's VOUCHED.td.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "trusted", "blocked"],
+  "properties": {
+    "version": { "const": 1 },
+    "trusted": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["users", "orgs"],
+      "properties": {
+        "users": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "orgs": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      }
+    },
+    "blocked": {
+      "type": "array",
+      "description": "Resolved before trusted, so a blocked account cannot be elevated by also belonging to a trusted org.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["login", "reason", "at", "source"],
+        "properties": {
+          "login": { "type": "string" },
+          "reason": { "type": "string", "minLength": 1 },
+          "at": { "type": "string", "format": "date" },
+          "source": {
+            "enum": ["manual", "auto"],
+            "description": "Nothing in the automated path writes here today; every entry is 'manual'."
+          }
+        }
+      }
+    }
+  }
+}

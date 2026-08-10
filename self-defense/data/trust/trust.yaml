@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0
+#
+# Human-owned trust list. Validated against ../../schemas/trust.schema.json.
+# Changed only by pull request — nothing in the automated path writes here.
+#
+# `blocked` is resolved before `trusted`, so a blocked account cannot be
+# elevated by also belonging to a trusted org.
+version: 1
+
+trusted:
+  users: []
+  orgs:
+    - go-openapi
+
+blocked: []

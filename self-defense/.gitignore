@@ -1,0 +1,5 @@
+node_modules/
+
+# dist/ is deliberately NOT ignored. It is the committed bundle that lets the
+# action run with `using: node24` and no setup or install step — see DESIGN.md §2.
+# CI verifies it stays in sync with src/ via `npm run check-dist`.

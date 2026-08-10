@@ -1,0 +1,79 @@
+# SPDX-License-Identifier: Apache-2.0
+name: go-openapi self-defense
+description: |
+  Triage spam issues and pull requests.
+  Runs as a bundled node action: no setup steps, no package install, no model
+  download. The knowledge base ships in the action tarball and is on local disk
+  before the first step runs.
+  Refer to [the design](./DESIGN.md).
+
+author: go-openapi
+
+branding:
+  icon: shield
+  color: purple
+
+inputs:
+  github-token:
+    description: Token used to read the item and to close/comment/label it.
+    required: false
+    default: ${{ github.token }}
+  corpus-token:
+    description: |
+      Token with `contents: write` on the corpus repository, used to dispatch
+      the redacted training record. Learning is disabled when unset; triage is
+      unaffected.
+    required: false
+    default: ''
+  corpus-repo:
+    description: Repository holding the shared org-wide corpus.
+    required: false
+    default: go-openapi/gh-actions
+  config-path:
+    description: Path to the per-repo config, relative to the repo root.
+    required: false
+    default: .github/self-defense.yml
+  shadow-mode:
+    description: |
+      Evaluate and record, but take no action. Leave enabled until the corpus
+      has enough samples to trust the model — this is the correct way to deploy.
+    required: false
+    default: 'true'
+  contact-url:
+    description: Where a wrongly-closed contributor can appeal.
+    required: false
+    default: ''
+
+outputs:
+  outcome:
+    description: allow, review or deny.
+    value: ${{ steps.evaluate.outputs.outcome }}
+  p-spam:
+    description: Calibrated probability that the item is spam.
+    value: ${{ steps.evaluate.outputs.p-spam }}
+  stage:
+    description: Evaluation stage that produced the decision (0, 1 or 2).
+    value: ${{ steps.evaluate.outputs.stage }}
+  suppressed-by:
+    description: JSON array of hard gates that downgraded the outcome.
+    value: ${{ steps.evaluate.outputs.suppressed-by }}
+  details:
+    description: Full decision including the evidence breakdown, as JSON.
+    value: ${{ steps.evaluate.outputs.details }}
+
+runs:
+  using: composite
+  steps:
+    # No setup-node, no install. `dist/` is committed and self-contained; this
+    # step is the entire runtime cost of the action.
+    - id: evaluate
+      shell: bash
+      env:
+        SELFDEF_TOKEN: ${{ inputs.github-token }}
+        SELFDEF_CORPUS_TOKEN: ${{ inputs.corpus-token }}
+        SELFDEF_CORPUS_REPO: ${{ inputs.corpus-repo }}
+        SELFDEF_CONFIG_PATH: ${{ inputs.config-path }}
+        SELFDEF_SHADOW_MODE: ${{ inputs.shadow-mode }}
+        SELFDEF_CONTACT_URL: ${{ inputs.contact-url }}
+        SELFDEF_ACTION_PATH: ${{ github.action_path }}
+      run: node "${{ github.action_path }}/dist/evaluate.js"

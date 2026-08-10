@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: Apache-2.0
+name: go-openapi self-defense collector
+description: |
+  Append dispatched training records to the shared corpus. Runs in
+  go-openapi/gh-actions only, triggered by repository_dispatch from evaluating
+  repos, and serialised by a concurrency group so concurrent appends from many
+  repos cannot race on the JSONL files.
+  Refer to [the design](./../DESIGN.md#5-learning-loop).
+
+author: go-openapi
+
+inputs:
+  github-token:
+    description: Token able to commit the corpus append.
+    required: true
+  payload:
+    description: The dispatched record, as JSON.
+    required: true
+
+outputs:
+  appended:
+    description: Number of records appended after deduplication.
+    value: ${{ steps.collect.outputs.appended }}
+
+runs:
+  using: composite
+  steps:
+    - id: collect
+      shell: bash
+      env:
+        SELFDEF_TOKEN: ${{ inputs.github-token }}
+        SELFDEF_PAYLOAD: ${{ inputs.payload }}
+        SELFDEF_ACTION_PATH: ${{ github.action_path }}
+      # Re-validates redaction before writing. The payload arrived over the
+      # network from another repository, so this is the last place we can stop
+      # un-redacted text from being committed to a public repo.
+      run: node "${{ github.action_path }}/../dist/collect.js"

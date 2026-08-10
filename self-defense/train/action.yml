@@ -1,0 +1,72 @@
+# SPDX-License-Identifier: Apache-2.0
+name: go-openapi self-defense trainer
+description: |
+  Re-derive the spam knowledge base from the shared corpus and open a pull
+  request with the result. Scheduled, runs in go-openapi/gh-actions only.
+  Refer to [the design](./../DESIGN.md).
+
+author: go-openapi
+
+inputs:
+  github-token:
+    description: Token able to push a branch and open a pull request.
+    required: true
+  holdout:
+    description: Fraction of the corpus held out for calibration and metrics.
+    required: false
+    default: '0.2'
+  seed:
+    description: Split seed. Fixed so a retrain on identical data is reproducible.
+    required: false
+    default: '20260810'
+  lexical-only:
+    description: |
+      Skip the dense embedding pass and build centroids from tf-idf means alone.
+      Much faster; useful while the corpus is small enough that the dense pass
+      would only be fitting noise.
+    required: false
+    default: 'false'
+  min-precision:
+    description: Refuse to promote a knowledge base below this held-out precision.
+    required: false
+    default: '0.95'
+  max-boundary-drift:
+    description: |
+      Refuse to promote when more than this fraction of held-out decisions flip
+      versus the live knowledge base. Bounds how far the model can wander
+      between human reviews — see DESIGN.md §3.2.
+    required: false
+    default: '0.10'
+
+outputs:
+  promoted:
+    description: Whether the candidate passed the promotion gate.
+    value: ${{ steps.train.outputs.promoted }}
+  kb-version:
+    description: Version of the candidate knowledge base.
+    value: ${{ steps.train.outputs.kb-version }}
+  metrics:
+    description: Held-out metrics per event kind, as JSON.
+    value: ${{ steps.train.outputs.metrics }}
+
+runs:
+  using: composite
+  steps:
+    # The dense pass wants a real Node toolchain and may pull an ONNX runtime.
+    # Acceptable here and nowhere else: this job is nightly and unattended, so
+    # its startup cost is invisible. The hot path never does any of this.
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+
+    - id: train
+      shell: bash
+      env:
+        SELFDEF_TOKEN: ${{ inputs.github-token }}
+        SELFDEF_HOLDOUT: ${{ inputs.holdout }}
+        SELFDEF_SEED: ${{ inputs.seed }}
+        SELFDEF_LEXICAL_ONLY: ${{ inputs.lexical-only }}
+        SELFDEF_MIN_PRECISION: ${{ inputs.min-precision }}
+        SELFDEF_MAX_BOUNDARY_DRIFT: ${{ inputs.max-boundary-drift }}
+        SELFDEF_ACTION_PATH: ${{ github.action_path }}
+      run: node "${{ github.action_path }}/../dist/train.js"

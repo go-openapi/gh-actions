@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/go-openapi/gh-actions/self-defense/schemas/corpus-record.schema.json",
+  "title": "Self-defense corpus record",
+  "description": "One line of data/corpus/{issues,pulls}.jsonl. Text is redacted; raw user input never appears here. See DESIGN.md §3.1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["v", "id", "kind", "ts", "repo", "author", "text", "features", "label", "decision"],
+  "properties": {
+    "v": { "const": 1 },
+    "id": {
+      "type": "string",
+      "description": "owner/name#number. Dedup key; on replay the last write wins.",
+      "pattern": "^[^/]+/[^#]+#[0-9]+$"
+    },
+    "kind": { "enum": ["issue", "pull"] },
+    "ts": { "type": "string", "format": "date-time" },
+    "repo": { "type": "string", "pattern": "^[^/]+/[^/]+$" },
+    "author": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["login", "id", "type", "association"],
+      "properties": {
+        "login": { "type": "string" },
+        "id": { "type": "integer" },
+        "type": { "type": "string" },
+        "association": {
+          "enum": ["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR", "FIRST_TIME_CONTRIBUTOR", "FIRST_TIMER", "MANNEQUIN", "NONE"]
+        }
+      }
+    },
+    "text": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sha256", "redacted", "hosts", "lang"],
+      "properties": {
+        "sha256": {
+          "type": "string",
+          "description": "Digest of the ORIGINAL text, for exact-duplicate detection only.",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "redacted": {
+          "type": "string",
+          "description": "URLs, emails, mentions, code blocks and digit runs replaced by placeholders.",
+          "not": {
+            "pattern": "https?://|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
+          }
+        },
+        "hosts": {
+          "type": "array",
+          "description": "Bare hostnames lifted from URLs. Not clickable; feeds host reputation.",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "lang": {
+          "type": "string",
+          "description": "Detected language. Used for training stratification only, never as a signal."
+        }
+      }
+    },
+    "features": {
+      "type": "object",
+      "description": "Flat facts observed at decision time. Values only; no scoring.",
+      "additionalProperties": { "type": ["number", "boolean", "null"] }
+    },
+    "label": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["class", "source", "confidence", "by", "at"],
+      "properties": {
+        "class": { "enum": ["spam", "ham"] },
+        "source": {
+          "enum": ["auto", "maintainer", "backfill"],
+          "description": "auto = the system's own verdict (weak). No writer produces 'maintainer' yet; the field exists to avoid a format migration when ground truth is added."
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Training sample weight. Weak auto-labels ~0.4; maintainer verdicts 1.0."
+        },
+        "by": { "type": ["string", "null"] },
+        "at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "pSpam", "stage", "kbVersion"],
+      "properties": {
+        "outcome": { "enum": ["allow", "review", "deny"] },
+        "pSpam": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "stage": { "enum": [0, 1, 2] },
+        "kbVersion": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

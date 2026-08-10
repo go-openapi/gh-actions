@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/go-openapi/gh-actions/self-defense/schemas/kb.schema.json",
+  "title": "Self-defense knowledge base",
+  "description": "Derived artifact, regenerated wholesale by the trainer and landed by pull request. Never hand-edited. Ships inside the action tarball, so size is on the critical path of every evaluation: budget 2 MB.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["v", "kbVersion", "trainedAt", "vectorizer", "idf", "models"],
+  "properties": {
+    "v": { "const": 1 },
+    "kbVersion": { "type": "integer", "minimum": 0 },
+    "trainedAt": { "type": "string", "format": "date-time" },
+    "vectorizer": {
+      "type": "object",
+      "description": "Must match the action's vectoriser exactly. A KB trained under one spec and scored under another is silently wrong, so the loader fails loudly on mismatch.",
+      "additionalProperties": false,
+      "required": ["dims", "word", "char", "sublinear"],
+      "properties": {
+        "dims": { "type": "integer", "minimum": 256, "maximum": 65536 },
+        "word": { "$ref": "#/$defs/ngramRange" },
+        "char": { "$ref": "#/$defs/ngramRange" },
+        "sublinear": { "type": "boolean" }
+      }
+    },
+    "idf": { "$ref": "#/$defs/quantizedVector" },
+    "models": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["issue", "pull"],
+      "properties": {
+        "issue": { "$ref": "#/$defs/model" },
+        "pull": { "$ref": "#/$defs/model" }
+      }
+    }
+  },
+  "$defs": {
+    "ngramRange": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 1, "maximum": 8 },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "quantizedVector": {
+      "type": "object",
+      "description": "int8 with a symmetric per-vector scale, base64-encoded. ~14x smaller than JSON floats at negligible precision cost for L2-normalised vectors.",
+      "additionalProperties": false,
+      "required": ["scale", "data"],
+      "properties": {
+        "scale": { "type": "number", "exclusiveMinimum": 0 },
+        "data": { "type": "string", "contentEncoding": "base64" }
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prior", "centroids", "termWeights", "calibration", "signalLLR"],
+      "properties": {
+        "prior": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Base rate of spam for this kind in the training corpus."
+        },
+        "centroids": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["spam", "ham"],
+          "properties": {
+            "spam": { "$ref": "#/$defs/quantizedVector" },
+            "ham": { "$ref": "#/$defs/quantizedVector" }
+          }
+        },
+        "termWeights": {
+          "type": "object",
+          "description": "Sparse interpretable weights keyed by redacted token, so the breakdown posted to a contributor can name what it saw.",
+          "additionalProperties": { "type": "number" }
+        },
+        "calibration": {
+          "type": "object",
+          "description": "Platt scaling fitted on a held-out split. Not optional: it absorbs the miscalibration caused by naive-Bayes' false independence assumption.",
+          "additionalProperties": false,
+          "required": ["kind", "a", "b"],
+          "properties": {
+            "kind": { "const": "platt" },
+            "a": { "type": "number" },
+            "b": { "type": "number" }
+          }
+        },
+        "signalLLR": {
+          "type": "object",
+          "description": "Per-signal log-likelihood ratios counted from the corpus. This is what replaces fossier's hand-tuned constants.",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["bins", "llr"],
+            "properties": {
+              "bins": {
+                "type": "array",
+                "description": "Upper edges, ascending. Chosen by quantile over observed values.",
+                "items": { "type": "number" }
+              },
+              "llr": {
+                "type": "array",
+                "description": "One entry per bin plus one for the tail.",
+                "items": { "type": "number" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

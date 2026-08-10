@@ -1,0 +1,29 @@
+{
+  "kbVersion": 0,
+  "trainedAt": "1970-01-01T00:00:00Z",
+  "corpusDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "samples": {
+    "issue": {
+      "spam": 0,
+      "ham": 0
+    },
+    "pull": {
+      "spam": 0,
+      "ham": 0
+    }
+  },
+  "metrics": {
+    "issue": {
+      "precision": 0,
+      "recall": 0,
+      "auc": 0.5,
+      "boundaryDrift": 0
+    },
+    "pull": {
+      "precision": 0,
+      "recall": 0,
+      "auc": 0.5,
+      "boundaryDrift": 0
+    }
+  }
+}
