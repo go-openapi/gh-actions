@@ -62,14 +62,18 @@ jobs:
       -
         name: Bump release
         id: bump-release
+        env:
+          BUMP_PATCH: ${{ inputs.bump-patch }}
+          BUMP_MINOR: ${{ inputs.bump-minor }}
+          BUMP_MAJOR: ${{ inputs.bump-major }}
         run: |
           # determine next tag to push
           NEXT_TAG=""
-          if   [[ '${{ inputs.bump-patch }}' == 'true' ]] ; then
+          if   [[ "$BUMP_PATCH" == 'true' ]] ; then
             NEXT_TAG=$(svu patch)
-          elif [[ '${{ inputs.bump-minor }}' == 'true' ]] ; then
+          elif [[ "$BUMP_MINOR" == 'true' ]] ; then
             NEXT_TAG=$(svu minor)
-          elif [[ '${{ inputs.bump-major }}' == 'true' ]] ; then
+          elif [[ "$BUMP_MAJOR" == 'true' ]] ; then
             NEXT_TAG=$(svu major)
           else
             echo "::error::invalid options::One of bump-patch, bump-minor or bump-major must be true"

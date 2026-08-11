@@ -136,8 +136,12 @@ runs:
       name: Validate GPG inputs
       if: ${{ inputs.enable-gpg-signing == 'true' }}
       shell: bash
+      env:
+        GPG_PRIVATE_KEY: ${{ inputs.gpg-private-key }}
+        GPG_PASSPHRASE: ${{ inputs.gpg-passphrase }}
+        GPG_FINGERPRINT: ${{ inputs.gpg-fingerprint }}
       run: |
-        if [[ -z "${{ inputs.gpg-private-key }}" || -z "${{ inputs.gpg-passphrase }}" || -z "${{ inputs.gpg-fingerprint }}" ]]; then
+        if [[ -z "$GPG_PRIVATE_KEY" || -z "$GPG_PASSPHRASE" || -z "$GPG_FINGERPRINT" ]]; then
           echo "::error::GPG signing is enabled but required credentials are missing"
           echo "::error::Required: gpg-private-key, gpg-passphrase, gpg-fingerprint"
           exit 1

@@ -60,11 +60,13 @@ runs:
       env:
         TOOL: gotestsum
         VERSION_RESOLVER: '${{ github.action_path }}/../../get-tool-version.sh'
+        INPUT_VERSION: '${{ inputs.version }}'
+        INPUT_VERSION_EMPTY: '${{ !inputs.version }}'
       run: |
-        if [[ '${{ !inputs.version }}' == 'true' || '${{ inputs.version }}' == 'auto' ]] ; then
+        if [[ "${INPUT_VERSION_EMPTY}" == 'true' || "${INPUT_VERSION}" == 'auto' ]] ; then
           VERSION=$("${VERSION_RESOLVER}" "${TOOL}")
         else
-          VERSION='${{ inputs.version }}'
+          VERSION="${INPUT_VERSION}"
         fi
 
         if [[ -z "${VERSION}" ]] ; then

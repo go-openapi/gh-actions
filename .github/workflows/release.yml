@@ -31,11 +31,13 @@ jobs:
         name: Extract tag message
         id: get-message
         # tag message is not retrieved unless we fetch the ref explictly
+        env:
+          TAG: ${{ inputs.tag }}
         run: |
           set -x
 
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-          MESSAGE=$(git tag -l '${{ inputs.tag }}' --format='%(contents:subject)
+          MESSAGE=$(git tag -l "$TAG" --format='%(contents:subject)
 
           %(contents:body)
           ')
@@ -46,7 +48,7 @@ jobs:
             echo 'EOF'
           } >> "${GITHUB_OUTPUT}"
 
-          echo "Message in git tag ${{ inputs.tag }}"
+          echo "Message in git tag $TAG"
           echo "$MESSAGE"
       -
         name: Generate release notes
