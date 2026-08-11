@@ -157,8 +157,11 @@ runs:
       name: Validate GitHub App inputs
       if: ${{ inputs.enable-github-app == 'true' }}
       shell: bash
+      env:
+        GITHUB_APP_ID: ${{ inputs.github-app-id }}
+        GITHUB_APP_PRIVATE_KEY: ${{ inputs.github-app-private-key }}
       run: |
-        if [[ -z "${{ inputs.github-app-id }}" || -z "${{ inputs.github-app-private-key }}" ]]; then
+        if [[ -z "$GITHUB_APP_ID" || -z "$GITHUB_APP_PRIVATE_KEY" ]]; then
           echo "::error::GitHub App is enabled but required credentials are missing"
           echo "::error::Required: github-app-id, github-app-private-key"
           exit 1
