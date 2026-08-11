@@ -1,6 +1,6 @@
 name: Vulnerability scans
 
-permissions: read-all
+permissions: {}
 
 # description: |
 # Scans the go dependencies repos for vulnerabilities
