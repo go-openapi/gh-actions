@@ -17,11 +17,12 @@ source of several ideas kept below. Its limits, and what we do instead:
 | fossier | here |
 |---|---|
 | `setup-uv` + `setup-python` + `uv pip install` before the first API call | bundled JS, `using: node24`, `dist/index.js` — runtime starts in ~200ms |
-| 17 signals, always, sequential HTTP (several on the 30/min Search pool) | staged evaluation; stage 0 uses **zero** network calls and settles most events |
+| 17 signals, always, sequential HTTP (several on the 30/min Search pool) | staged evaluation; stage 0 uses **zero** network calls and settles most events.
+**Fred** not sure here. we need gh api to inspect the author’s account and stats |
 | hand-tuned magic constants (`min(days/365,1)`, `score -= 0.15` for an em-dash) | per-signal **log-likelihood ratios fitted from the corpus**; hand values are priors, not verdicts |
 | weighted mean of `0..1` "trust" values | log-odds evidence accumulation with explicit abstention and per-signal evidence caps |
 | score 0–100 with 40/70 cut points | calibrated `P(spam)`; thresholds derived from an explicit false-positive cost |
-| binary SQLite blob (`.fossier.db`) committed to the repo | append-only JSONL + a derived JSON artifact — diffable, reviewable, mergeable |
+| binary SQLite blob (`.fossier.db`) committed to the repo | append-only JSONL + a derived JSON artifact — diffable, reviewable, mergeable **Fred** not sure here: the training contains legit issues/PR’s so matching should account for a query such as « no semantic match with anything legit » as well as « match spam ». |
 | single-repo database | one org-wide corpus, so a cross-posting spammer is known everywhere at once |
 | PRs only | issues and PRs, with distinct rule sets and distinct trained models |
 | static rules; no learning | scheduled trainer re-derives the knowledge base from the corpus and lands it via PR |
