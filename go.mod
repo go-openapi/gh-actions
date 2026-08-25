@@ -4,7 +4,7 @@ go 1.25.3
 
 require (
 	github.com/caarlos0/svu/v3 v3.4.1
-	github.com/ctrf-io/go-ctrf-json-reporter v0.1.1
+	github.com/ctrf-io/go-ctrf-json-reporter v0.2.0
 	github.com/jstemmer/go-junit-report/v2 v2.1.0
 	gotest.tools/gotestsum v1.13.0
 )
