@@ -52,7 +52,7 @@ runs:
       run: |
         # determine next tag to push
         NEXT_TAG=""
-        CURRENT=$(svu current)
+        CURRENT=$(svu current||true)   # NOTE: fails when multiple tags - we just want to catch the case when no tag exists
         if [[ "${CURRENT}" == "v0.0.0" ]] ; then
           # never been tagged before: initialize v0.0.1
           NEXT_TAG="v0.0.1"
