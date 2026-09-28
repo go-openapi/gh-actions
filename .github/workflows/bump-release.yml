@@ -58,7 +58,7 @@ jobs:
           fetch-depth: 0
       -
         name: install svu
-        uses: go-openapi/gh-actions/install/svu@c0f86e95429fd84e4c96786d630422e9221f556a # v1.4.19
+        uses: go-openapi/gh-actions/install/svu@2a20802fd4ec9b9fd4732b832c91fec9c4aae777 # v1.4.20
       -
         name: Bump release
         id: bump-release
