@@ -4,8 +4,8 @@ github.com/bitfield/gotestdox v0.2.3 h1:H8Wy07kYacr3YSF5aJON/m9ASE+PGKOSufXkTjqQ
 github.com/bitfield/gotestdox v0.2.3/go.mod h1:bq/HemlNNqEvjOzy7brevVhzZD8WTGFDGq59DOIsHqI=
 github.com/caarlos0/svu/v3 v3.4.1 h1:YWhuxMkvvWBhHv27uQ/E8mBMj+R0LcwwTxriAdHnHGg=
 github.com/caarlos0/svu/v3 v3.4.1/go.mod h1:ArIe333I36pNeEGAPSQRmUwRQtQ8TR03xp23apFPfRs=
-github.com/ctrf-io/go-ctrf-json-reporter v0.3.0 h1:hE/WYp6ESO0CyfIkoHQHvl3m+ZWeW5ROApc7GGHEMsU=
-github.com/ctrf-io/go-ctrf-json-reporter v0.3.0/go.mod h1:UO9kppARVI+yfLWunvdq9ukB+DiPNsEwswEA2meAjXU=
+github.com/ctrf-io/go-ctrf-json-reporter v0.4.0 h1:4RD5RrfgfFfdhicLYHtVXWcOP4o+Gi0eFTcNzxSaCBY=
+github.com/ctrf-io/go-ctrf-json-reporter v0.4.0/go.mod h1:UO9kppARVI+yfLWunvdq9ukB+DiPNsEwswEA2meAjXU=
 github.com/dnephin/pflag v1.0.7 h1:oxONGlWxhmUct0YzKTgrpQv9AUA1wtPBn7zuSjJqptk=
 github.com/dnephin/pflag v1.0.7/go.mod h1:uxE91IoWURlOiTUIA8Mq5ZZkAv3dPUfZNaT80Zm7OQE=
 github.com/fatih/color v1.19.0 h1:Zp3PiM21/9Ld6FzSKyL5c/BULoe/ONr9KlbYVOfG8+w=
