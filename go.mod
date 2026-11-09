@@ -3,7 +3,7 @@ module gh-actions
 go 1.27.3
 
 require (
-	github.com/caarlos0/svu/v3 v3.4.2
+	github.com/caarlos0/svu/v3 v3.4.4
 	github.com/ctrf-io/go-ctrf-json-reporter v0.4.0
 	github.com/jstemmer/go-junit-report/v2 v2.1.0
 	gotest.tools/gotestsum v1.13.0
